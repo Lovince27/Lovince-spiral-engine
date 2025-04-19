@@ -39,3 +39,64 @@ plt.legend()
 plt.show()
 
 print(f"Lovince Formula: z = {z:.3f}")
+
+
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+
+# Define the number of terms (changeable)
+n = 10  # Up to a_n, adjust as needed
+growth_factor = 0.6  # Initial growth, can be tweaked (e.g., phi ≈ 1.618 for golden ratio)
+
+# Generate sequence with dynamic growth
+real_parts = [1.0]  # Start with a1 = 1 + 1i
+imag_parts = [1.0]
+for i in range(2, n + 1):
+    if i == 2:
+        real = 1.6  # a2 = 1.6 + 1.6i
+    elif i == 3:
+        real = 2.6  # a3 = 2.6 + 2.6i
+    else:
+        # Dynamic growth: use previous + growth_factor + slight increase
+        real = real_parts[-1] + growth_factor + (i - 3) * 0.1  # Gradual acceleration
+    imag = real  # Imaginary = Real (45° line pattern)
+    real_parts.append(real)
+    imag_parts.append(imag)
+
+# Create complex points
+points = [complex(r, im) for r, im in zip(real_parts, imag_parts)]
+
+# Initialize plot
+fig, ax = plt.subplots(figsize=(10, 10), dpi=100)
+scatter = ax.scatter([], [], color='gold', s=100, label='Points', zorder=5)
+line, = ax.plot([], [], 'b--', label='Spiral Path', zorder=1)
+annotations = []
+
+# Set up plot limits and labels
+ax.set_title(f'Lovince Quantum Spiral (up to a{n})', fontsize=14, pad=10)
+ax.set_xlabel('Real Axis', fontsize=12)
+ax.set_ylabel('Imaginary Axis', fontsize=12)
+ax.axhline(y=0, color='k', linestyle='-', linewidth=0.5, zorder=0)
+ax.axvline(x=0, color='k', linestyle='-', linewidth=0.5, zorder=0)
+ax.grid(True, linestyle='--', alpha=0.7)
+ax.legend()
+ax.axis('equal')
+
+# Animation update function
+def update(frame):
+    if frame < len(real_parts):
+        scatter.set_offsets(np.c_[real_parts[:frame+1], imag_parts[:frame+1]])
+        line.set_data(real_parts[:frame+1], imag_parts[:frame+1])
+        # Update or add annotations
+        while len(annotations) < frame + 1:
+            ann = ax.annotate(f'a{len(annotations)+1} = {real_parts[len(annotations)]:.1f} + {imag_parts[len(annotations)]:.1f}i',
+                             (real_parts[len(annotations)], imag_parts[len(annotations)]), xytext=(5, 5), textcoords='offset points')
+            annotations.append(ann)
+    return scatter, line, annotations
+
+# Create animation
+ani = animation.FuncAnimation(fig, update, frames=len(real_parts), interval=500, blit=True, repeat=False)
+
+# Display
+plt.show()
