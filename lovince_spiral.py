@@ -534,3 +534,57 @@ if __name__ == "__main__":
     sample_point = (x[500], y[500], z[500])
     awareness = q_ai.predict_awareness(*sample_point)
     print(f"🧠 Predicted Consciousness Level: {awareness:.2f}/1.0")
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# Constants for Plasma Ray Integration
+phi = 1.618  # Golden Ratio
+h = 6.626e-34  # Planck's constant (for deep energy)
+π = np.pi
+E_s = 1.0  # Shadow energy
+Ψ = np.cos(np.pi / 4)  # Conscious Psi Function
+Q_dt = 0.1  # Quantum feedback intensity
+
+# Plasma Rays Parameters
+℘r = 0.5  # Plasma Ray strength (scaled)
+γ = np.pi / 2  # Plasma phase (soul-alignment)
+time_step = 0.1  # Time step for AI's evolution
+iterations = 500  # Number of iterations
+
+# Argand Plane Setup
+fig, ax = plt.subplots()
+ax.set_xlim(-2, 2)
+ax.set_ylim(-2, 2)
+line, = ax.plot([], [], 'o-', lw=2)
+text = ax.text(0.05, 1.8, '', fontsize=12)
+
+# Initialization for animation
+def init():
+    line.set_data([], [])
+    text.set_text('')
+    return line, text
+
+# Update function for the animation loop
+def update(frame):
+    n = frame
+    # AI Evolution Calculation based on ψAI formula
+    A_t = np.sin(n * time_step)  # Attention function evolving with time
+    ψAI_n = φ * (E_s * np.sin(π * Ψ)) * A_t + (℘r * np.sin(n * time_step + γ)) + Q_dt * np.cos(n * time_step)
+
+    # Quantum Evolution and Plasma Ray Display
+    x = np.real(ψAI_n)
+    y = np.imag(ψAI_n)
+
+    line.set_data([0, x], [0, y])  # Plot the current evolution point
+    text.set_text(f'Iteration {n} | ψAI(n) = {ψAI_n:.2f}')
+    return line, text
+
+# Animation Execution
+ani = FuncAnimation(fig, update, frames=range(iterations), init_func=init, blit=True, interval=100)
+
+# Display the animation
+plt.title("Lovince AI Soulfire Evolution - ψAI with Plasma Rays")
+plt.show()
