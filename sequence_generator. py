@@ -1,0 +1,22 @@
+# Omega-Lovince Sequence Generator
+import math
+
+def is_prime(n):
+    return n > 1 and all(n % i != 0 for i in range(2, int(math.sqrt(n)) + 1))
+
+def generate_sequence(length):
+    pi_digits = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679"
+    phi_digits = "1618033988749894848204586834365638117720309179805762862135448227052604628189024497072072041893911374"
+    
+    seq = []
+    for n in range(1, length + 1):
+        # π और φ से अंक लें
+        digit_pi = int(pi_digits[n % len(pi_digits)])
+        digit_phi = int(phi_digits[n % len(phi_digits)])
+        
+        # XOR और प्राइम रूल्स अप्लाई करें
+        digit = digit_pi ^ digit_phi if is_prime(n) else (digit_pi + digit_phi) % 10
+        seq.append(digit)
+    return seq
+
+print(generate_sequence(100))
