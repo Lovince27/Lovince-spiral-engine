@@ -100,3 +100,79 @@ ani = animation.FuncAnimation(fig, update, frames=len(real_parts), interval=500,
 
 # Display
 plt.show()
+
+
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+import sounddevice as sd
+
+# --- Spiral Sequence Parameters ---
+n = 10
+growth_factor = 0.6
+real_parts = [1.0]
+imag_parts = [1.0]
+
+for i in range(2, n + 1):
+    if i == 2:
+        real = 1.6
+    elif i == 3:
+        real = 2.6
+    else:
+        real = real_parts[-1] + growth_factor + (i - 3) * 0.1
+    imag = real
+    real_parts.append(real)
+    imag_parts.append(imag)
+
+points = [complex(r, im) for r, im in zip(real_parts, imag_parts)]
+
+# --- Frequency Mapping Function ---
+def point_to_frequency(c):
+    mag = abs(c)
+    freq = 200 + (mag / max(np.abs(points))) * (963 - 200)
+    return freq
+
+# --- Sound Generator ---
+def play_tone(frequency, duration=0.2, samplerate=44100):
+    t = np.linspace(0, duration, int(samplerate * duration), False)
+    wave = np.sin(2 * np.pi * frequency * t)
+    sd.play(wave, samplerate=samplerate)
+    sd.wait()
+
+# --- Matplotlib Setup ---
+fig, ax = plt.subplots(figsize=(10, 10), dpi=100)
+scatter = ax.scatter([], [], color='gold', s=100, zorder=5)
+line, = ax.plot([], [], 'b--', label='Spiral Path', zorder=1)
+annotations = []
+
+ax.set_title(f'Lovince Quantum Spiral with Sound (aₙ, n=1 to {n})', fontsize=14, pad=10)
+ax.set_xlabel('Real Axis')
+ax.set_ylabel('Imaginary Axis')
+ax.axhline(y=0, color='k', linestyle='-', linewidth=0.5)
+ax.axvline(x=0, color='k', linestyle='-', linewidth=0.5)
+ax.grid(True, linestyle='--', alpha=0.7)
+ax.legend()
+ax.axis('equal')
+
+# --- Animation Function ---
+def update(frame):
+    if frame < len(points):
+        scatter.set_offsets(np.c_[real_parts[:frame+1], imag_parts[:frame+1]])
+        line.set_data(real_parts[:frame+1], imag_parts[:frame+1])
+        if len(annotations) < frame + 1:
+            ann = ax.annotate(
+                f'a{frame+1} = {real_parts[frame]:.1f} + {imag_parts[frame]:.1f}i',
+                (real_parts[frame], imag_parts[frame]),
+                xytext=(5, 5), textcoords='offset points'
+            )
+            annotations.append(ann)
+
+        # Sound: Quantum frequency tone per frame
+        freq = point_to_frequency(points[frame])
+        play_tone(freq)
+
+    return scatter, line, annotations
+
+ani = animation.FuncAnimation(fig, update, frames=len(points), interval=600, blit=False, repeat=False)
+
+plt.show()
