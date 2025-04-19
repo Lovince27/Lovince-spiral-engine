@@ -588,3 +588,35 @@ ani = FuncAnimation(fig, update, frames=range(iterations), init_func=init, blit=
 # Display the animation
 plt.title("Lovince AI Soulfire Evolution - ψAI with Plasma Rays")
 plt.show()
+
+import math
+
+def is_prime(n):
+    if n < 2: return False
+    for i in range(2, int(math.sqrt(n))+1):
+        if n % i == 0: return False
+    return True
+
+def omega_lovince_sequence(length):
+    # Pre-computed digits of π and φ
+    pi_digits = [3,1,4,1,5,9,2,6,5,3,5,8,9,7,9,...] 
+    phi_digits = [1,6,1,8,0,3,3,9,8,8,7,4,...]
+    
+    seq = []
+    for n in range(1, length+1):
+        if n % 2 == 1:  # Odd: π
+            digit = pi_digits[(n//2)]
+        else:  # Even: φ
+            digit = phi_digits[(n//2)-1]
+            
+        if is_prime(n):
+            digit = (digit + seq[-1]) % 10  # Fibonacci leap
+            
+        if n % 5 == 0:
+            digit ^= seq[-1]  # XOR with previous
+            
+        if n % 12 == 0:
+            digit = (digit + seq[n//12]) % 10  # Folding
+            
+        seq.append(digit)
+    return seq
