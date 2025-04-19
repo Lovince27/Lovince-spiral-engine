@@ -176,3 +176,11 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=len(points), interval=600, blit=False, repeat=False)
 
 plt.show()
+
+
+# Old line (deprecated in Matplotlib 3.7):
+# colors = plt.cm.get_cmap(self.colormap)(norm(range(len(t))))
+
+# Updated line (compatible with Matplotlib 3.7+ and 3.11+):
+cmap = plt.colormaps[self.colormap]  # Access colormap from new API
+colors = cmap(norm(range(len(t))))   # Apply normalized range to colormap
