@@ -190,3 +190,58 @@ norm = plt.Normalize(vmin=0, vmax=len(t))  # Ensure proper normalization
 cmap = plt.colormaps[self.colormap]        # New Matplotlib 3.7+ compatible
 colors = cmap(norm(range(len(t))))         # Apply colormap to normalized range
 self.spiral.set_color(colors)
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import cmath
+
+# Constants
+phi = 1.61803398875
+h = 6.62607015e-34  # Planck
+c = 299792458       # Speed of light
+ΔΨ = 1.0            # Conscious shift (set as needed)
+
+# Lovince Fractal Pulse Sequence
+def LFPS(n, k):
+    base = (1 + 1j) * (phi ** (n - 1))
+    return base ** (3 ** k)
+
+# Quantum Energy Formula using LFPS
+def fractal_quantum_energy(n, k):
+    lfps = LFPS(n, k)
+    magnitude = abs(lfps)
+    theta = cmath.phase(lfps)
+    energy = (ΔΨ * phi * h * c**2) * magnitude + 1j * np.exp(-np.pi * theta / 4)
+    return energy, magnitude, theta
+
+# Visualization
+def animate_lfps(max_k=5, n=3):
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal')
+    ax.grid(True)
+    ax.set_title("Lovince Fractal Spin Spiral")
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-10, 10)
+
+    point, = ax.plot([], [], 'ro')
+    trail, = ax.plot([], [], 'c-', linewidth=1)
+
+    xs, ys = [], []
+
+    def update(frame):
+        energy, mag, theta = fractal_quantum_energy(n, frame)
+        x, y = energy.real, energy.imag
+        xs.append(x)
+        ys.append(y)
+        point.set_data(x, y)
+        trail.set_data(xs, ys)
+        ax.set_title(f"n={n}, k={frame}, |E|={mag:.2e}, θ={theta:.2f} rad")
+        return point, trail
+
+    ani = FuncAnimation(fig, update, frames=range(max_k + 1), interval=1000, repeat=False)
+    plt.show()
+
+# Run animation
+if __name__ == "__main__":
+    animate_lfps(max_k=6, n=3)
