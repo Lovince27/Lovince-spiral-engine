@@ -184,3 +184,9 @@ plt.show()
 # Updated line (compatible with Matplotlib 3.7+ and 3.11+):
 cmap = plt.colormaps[self.colormap]  # Access colormap from new API
 colors = cmap(norm(range(len(t))))   # Apply normalized range to colormap
+
+
+norm = plt.Normalize(vmin=0, vmax=len(t))  # Ensure proper normalization
+cmap = plt.colormaps[self.colormap]        # New Matplotlib 3.7+ compatible
+colors = cmap(norm(range(len(t))))         # Apply colormap to normalized range
+self.spiral.set_color(colors)
