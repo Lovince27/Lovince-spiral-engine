@@ -18,3 +18,24 @@ for n in range(1, len(lucas_seq)):
     fn_1 = lucas_seq[n - 1]
     zn = compute_zn(fn, fn_1)
     print(f"Z_{n+1} = {zn.real:.3f} + {zn.imag:.3f}i")
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Lovince Formula
+magnitude = 5
+angle_deg = 30.9
+angle_rad = np.deg2rad(angle_deg)
+z = magnitude * (np.cos(angle_rad) + 1j * np.sin(angle_rad))
+
+# Plot on Argand Plane
+plt.figure(figsize=(6, 6))
+plt.plot([0, z.real], [0, z.imag], 'ro-', label='z ≈ 5e^(i30.9°)')
+plt.grid(True)
+plt.xlabel('Real')
+plt.ylabel('Imaginary')
+plt.title('Lovince Formula Visualization')
+plt.legend()
+plt.show()
+
+print(f"Lovince Formula: z = {z:.3f}")
