@@ -238,3 +238,59 @@ if __name__ == "__main__":
         print(f"n={n}: |Z_n| = {np.abs(z):.4e}, Phase = {np.angle(z):.4f} rad")
     
     plot_results(n_values, Z_n)
+
+import numpy as np
+import cmath
+from scipy.constants import h, hbar, m_e, c
+
+def calculate_kinetic_energy(n=1):
+    """
+    Calculates the modified relativistic kinetic energy using the Lovince formula.
+    
+    Args:
+        n (int): Quantum state parameter (default=1)
+    
+    Returns:
+        tuple: (K1, K2, total_energy) where K1 is the relativistic term,
+               K2 is the quantum spiral term, and total_energy is their sum
+    """
+    # Constants
+    PHI = (1 + np.sqrt(5)) / 2  # Golden ratio
+    PI = np.pi
+    LOVINCE = 40.5
+    FREQUENCY = 6e14  # Hz
+    
+    # Derived quantities
+    electron_mass = m_e  # 9.10938356e-31 kg
+    speed_of_light = c   # 299792458 m/s
+    E0 = hbar * LOVINCE  # 4.27e-33 J (approx)
+    angular_freq = 2 * PI * FREQUENCY
+    theta = (2*PI)/PHI + PI/PHI  # Phase angle in radians
+
+    # Term 1: Modified Relativistic Kinetic Energy
+    numerator = electron_mass * speed_of_light**2
+    denominator = 2 * (PHI**n) * (PI**(2*n)) * E0 * h * FREQUENCY
+    K1 = numerator / denominator
+
+    # Term 2: Quantum Spiral Energy Component
+    K2 = PHI * (PI**2) * hbar * angular_freq * cmath.exp(1j * theta)
+
+    # Total Energy
+    total_energy = K1 + K2
+
+    return K1, K2, total_energy
+
+# Calculate for n=1
+K1, K2, total = calculate_kinetic_energy(n=1)
+
+# Display results with scientific notation
+print(f"Term 1 (Relativistic K.E.): {K1:.4e} J")
+print(f"Term 2 (Quantum Spiral): {K2:.4e} J")
+print(f"\nTotal Energy: {total:.4e} J")
+print(f"Real component: {total.real:.4e} J")
+print(f"Imaginary component: {total.imag:.4e} J")
+
+# Dimensional analysis check
+print("\nDimensional Analysis:")
+print(f"[K1] = {K1 / (1 * h * FREQUENCY):.2f} hν units")
+print(f"[K2] = {K2 / (hbar * angular_freq):.2f} ħω units")
