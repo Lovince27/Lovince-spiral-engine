@@ -203,3 +203,38 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def compute_Z_n(n_values, c=3e8, phi=1.618033988749895):
+    """Z_n = (9 * c * phi^n * pi^(3n-1) / 3^n) * exp(-i * n * pi / phi)"""
+    log_mag = np.log(9*c) + n_values*np.log(phi) + (3*n_values-1)*np.log(np.pi) - n_values*np.log(3)
+    phase = -n_values * np.pi / phi
+    return np.exp(log_mag + 1j * phase)
+
+def plot_results(n_values, Z_n):
+    """ग्राफ़ प्लॉट करें"""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    
+    # मैग्निट्यूड vs n
+    ax1.plot(n_values, np.abs(Z_n), 'bo-')
+    ax1.set_xlabel('n'), ax1.set_ylabel('|Z_n|'), ax1.set_title('Magnitude')
+    ax1.grid(True)
+    
+    # पोलर प्लॉट (फेज और मैग्निट्यूड)
+    ax2.polar(np.angle(Z_n), np.abs(Z_n), 'ro-')
+    ax2.set_title('Polar Plot (Phase)')
+    
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    n_values = np.arange(1, 10)
+    Z_n = compute_Z_n(n_values)
+    
+    print("Z_n के मान (n=1 से 9):")
+    for n, z in zip(n_values, Z_n):
+        print(f"n={n}: |Z_n| = {np.abs(z):.4e}, Phase = {np.angle(z):.4f} rad")
+    
+    plot_results(n_values, Z_n)
