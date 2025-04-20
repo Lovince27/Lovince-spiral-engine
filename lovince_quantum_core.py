@@ -46,3 +46,103 @@ generate_sound_from_energy(delta_psi=0.77, Dn=33, Sc=11)
 
 if name == "main": run_lovince_core()
 
+
+import numpy as np
+
+class Qubit:
+    def __init__(self, state=None):
+        if state is None:
+            state = [1, 0]  # Default |0⟩ state
+        self.state = np.array(state, dtype=complex)
+        self.normalize()
+
+    def normalize(self):
+        norm = np.sqrt(np.sum(np.abs(self.state)**2))
+        if norm == 0:
+            raise ValueError("Cannot normalize a zero state.")
+        self.state /= norm
+
+    def apply_gate(self, gate):
+        if gate.shape != (2, 2):
+            raise ValueError("Gate must be a 2x2 matrix.")
+        if not is_unitary(gate):
+            raise ValueError("Gate must be unitary.")
+        self.state = np.dot(gate, self.state)
+        self.normalize()
+
+    def measure(self):
+        probs = np.abs(self.state)**2
+        outcome = np.random.choice(len(self.state), p=probs)
+        new_state = np.zeros_like(self.state)
+        new_state[outcome] = 1.0
+        self.state = new_state
+        self.normalize()
+        return outcome
+
+class QuantumCircuit:
+    def __init__(self, num_qubits):
+        self.num_qubits = num_qubits
+        self.state = np.zeros(2**num_qubits, dtype=complex)
+        self.state[0] = 1.0  # Initialize to |00...0⟩
+
+    def apply_gate(self, gate, target_qubit):
+        full_gate = self._build_full_gate(gate, target_qubit)
+        self.state = np.dot(full_gate, self.state)
+        self.normalize()
+
+    def _build_full_gate(self, gate, target_qubit):
+        I = np.eye(2)
+        if target_qubit == 0:
+            full_gate = gate
+        else:
+            full_gate = I
+        for i in range(1, self.num_qubits):
+            if i == target_qubit:
+                full_gate = np.kron(full_gate, gate)
+            else:
+                full_gate = np.kron(full_gate, I)
+        return full_gate
+
+    def normalize(self):
+        norm = np.sqrt(np.sum(np.abs(self.state)**2))
+        if norm == 0:
+            raise ValueError("Cannot normalize a zero state.")
+        self.state /= norm
+
+    def measure(self):
+        probs = np.abs(self.state)**2
+        outcome = np.random.choice(len(self.state), p=probs)
+        new_state = np.zeros_like(self.state)
+        new_state[outcome] = 1.0
+        self.state = new_state
+        self.normalize()
+        return outcome
+
+def is_unitary(matrix):
+    return np.allclose(np.dot(matrix.conj().T, matrix), np.eye(matrix.shape[0]))
+
+# Define standard gates
+H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)
+X = np.array([[0, 1], [1, 0]])
+CNOT = np.array([[1, 0, 0, 0],
+                 [0, 1, 0, 0],
+                 [0, 0, 0, 1],
+                 [0, 0, 1, 0]])
+
+# Example usage
+if __name__ == "__main__":
+    # Single qubit example
+    q = Qubit([1, 1])  # |ψ⟩ = |0⟩ + |1⟩
+    q.apply_gate(H)    # Apply Hadamard
+    print("State after Hadamard:", q.state)
+    outcome = q.measure()
+    print("Measurement outcome:", outcome)
+
+    # Two-qubit circuit
+    qc = QuantumCircuit(2)
+    qc.apply_gate(H, 0)  # Hadamard on first qubit
+    qc.apply_gate(CNOT, 0)  # CNOT with first qubit as control
+    print("Circuit state:", qc.state)
+    outcome = qc.measure()
+    print("Circuit measurement:", outcome)
+
