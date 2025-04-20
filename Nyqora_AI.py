@@ -137,3 +137,69 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def compute_Z_n(n_values, c=3e8, phi=1.618033988749895):
+    """
+    आपका सूत्र: Z_n = (9 * c * phi^n * pi^(3n-1) / 3^n) * exp(-i * n * pi / phi)
+    """
+    if phi == 0:
+        raise ValueError("phi शून्य नहीं हो सकता")
+    if not np.all(np.isfinite(n_values)):
+        raise ValueError("n के मान वैध होने चाहिए")
+    
+    np.seterr(all='warn')
+    
+    log_magnitude = (
+        np.log(9 * c) +
+        n_values * np.log(phi) +
+        (3 * n_values - 1) * np.log(np.pi) -
+        n_values * np.log(3)
+    )
+    phase = -n_values * np.pi / phi
+    Z_n = np.exp(log_magnitude) * np.exp(1j * phase)
+    
+    if not np.all(np.isfinite(Z_n)):
+        print("चेतावनी: Z_n में गैर-वैध मान मिले")
+    
+    return Z_n
+
+def compute_KE1(n, numerator=9e16, denominator=1.34e-33):
+    """
+    ChatGPT की गणना: K.E._1 = numerator / denominator
+    """
+    KE = numerator / denominator
+    return KE
+
+def main():
+    # स्थिरांक
+    c = 3e8
+    phi = 1.618033988749895
+    n_values = np.arange(1, 10)  # n = 1 से 9
+    
+    # Z_n की गणना
+    Z_n = compute_Z_n(n_values, c, phi)
+    
+    # K.E._1 की गणना
+    KE1 = compute_KE1(1)
+    print(f"ChatGPT का K.E._1 (n=1): {KE1:.2e} Joules")
+    
+    # Z_n के परिणाम
+    print("आपके सूत्र के Z_n मान (पहले 9):")
+    for n, z in zip(n_values, Z_n):
+        print(f"Z_{n} = {z:.4e} (परिमाण: {np.abs(z):.4e})")
+    
+    # ग्राफ
+    plt.figure(figsize=(10, 5))
+    plt.plot(n_values, np.abs(Z_n), label='|Z_n| (Magnitude)', marker='o')
+    plt.xlabel('n')
+    plt.ylabel('Magnitude')
+    plt.title('Z_n Magnitude vs n')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+if __name__ == "__main__":
+    main()
