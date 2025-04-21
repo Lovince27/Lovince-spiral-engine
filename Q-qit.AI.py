@@ -48,3 +48,6 @@ if __name__ == "__main__":
     print(f"Z_{n} = {Z_n}")
     print(f"E_{n} = {E_n:.3e} J")
     print(f"|ψ_{n}⟩ = {A_n:.5f} · e^(i·{theta_n:.3f}) · |{n}⟩")
+
+
+Zₙ = Lovince · φⁿ · π^(3ⁿ⁻¹) · e^(–i·n·π/φ)
