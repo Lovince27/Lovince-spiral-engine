@@ -2,3 +2,8 @@ chmod +x deploy_lovince_ai.sh
 ./deploy_lovince_ai.sh setup
 ./deploy_lovince_ai.sh test
 ./deploy_lovince_ai.sh deploy
+
+chmod +x deploy_lovince_ai.sh
+./deploy_lovince_ai.sh setup
+./deploy_lovince_ai.sh test
+./deploy_lovince_ai.sh deploy
