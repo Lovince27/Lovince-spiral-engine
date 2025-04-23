@@ -1,0 +1,1 @@
+Lovince AI respects your privacy. We collect only the data you provide (e.g., name for personalization), which is hashed and not stored. No data is shared with third parties. For inquiries, contact support@lovince.ai.
