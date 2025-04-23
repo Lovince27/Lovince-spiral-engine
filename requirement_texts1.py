@@ -1,0 +1,9 @@
+numpy
+matplotlib
+scipy
+sounddevice
+requests
+tweepy
+flask
+scikit-learn
+nltk
