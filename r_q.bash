@@ -1,0 +1,1 @@
+pip install qiskit[all] --upgrade
