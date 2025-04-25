@@ -17,3 +17,6 @@ print("Ψ =", equation.rhs)
 
 
 assert str(equation.rhs).count('*') == 6  # Verify 7 components
+
+def quantum_state(L, M, R, S, B, Q, C):
+       return L * M * R * S * B * Q * C
