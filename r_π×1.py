@@ -216,3 +216,144 @@ if __name__ == "__main__":
     """)
     qpi = QuantumPiAI()
     qpi.run()
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from qiskit.quantum_info import Statevector
+from qiskit.visualization import plot_bloch_multivector
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+
+class QuantumStateTomographer(nn.Module):
+    def __init__(self, n_qubits=3):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(2**n_qubits, 128),
+            nn.LeakyReLU(),
+            nn.Linear(128, 64)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(64, 128),
+            nn.Tanh(),
+            nn.Linear(128, 2**(n_qubits+1))  # Complex output
+        )
+        
+    def forward(self, x):
+        latent = self.encoder(x)
+        reconstructed = self.decoder(latent)
+        return reconstructed.view(-1, 2)
+
+class NeuralQuantumPi:
+    def __init__(self):
+        self.tomographer = QuantumStateTomographer().double()
+        self.optimizer = optim.AdamW(self.tomographer.parameters(), lr=0.001)
+        self.loss_fn = nn.MSELoss()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.tomographer.to(self.device)
+        
+        # Quantum setup
+        self.backend = Aer.get_backend('statevector_simulator')
+        self.n_qubits = 3
+        self.true_states = []
+        self.reconstructed_states = []
+        
+    def _generate_quantum_state(self):
+        """Creates random quantum states for training"""
+        qc = QuantumCircuit(self.n_qubits)
+        
+        # Random unitary evolution
+        for qubit in range(self.n_qubits):
+            qc.rx(np.random.rand()*2*np.pi, qubit)
+            qc.ry(np.random.rand()*2*np.pi, qubit)
+            qc.rz(np.random.rand()*2*np.pi, qubit)
+        
+        # Entanglement
+        for _ in range(2):
+            control, target = np.random.choice(self.n_qubits, 2, replace=False)
+            qc.cx(control, target)
+        
+        result = execute(qc, self.backend).result()
+        state = Statevector(result.get_statevector())
+        return state.data
+    
+    def _preprocess_state(self, state):
+        """Convert complex state to trainable format"""
+        real = state.real
+        imag = state.imag
+        return torch.tensor(np.concatenate([real, imag]), device=self.device)
+    
+    def train(self, epochs=1000):
+        progress = tqdm(range(epochs), desc="Neural Tomography Training")
+        
+        for epoch in progress:
+            # Generate training data
+            true_state = self._generate_quantum_state()
+            noisy_measurement = true_state + 0.1*np.random.randn(*true_state.shape)
+            
+            # Convert to tensor
+            input_tensor = self._preprocess_state(noisy_measurement)
+            target_tensor = self._preprocess_state(true_state)
+            
+            # Forward pass
+            self.optimizer.zero_grad()
+            output = self.tomographer(input_tensor)
+            
+            # Split complex output
+            pred_real = output[:, 0]
+            pred_imag = output[:, 1]
+            reconstructed = torch.complex(pred_real, pred_imag)
+            
+            # Calculate loss
+            loss = self.loss_fn(reconstructed, target_tensor[:len(reconstructed)])
+            
+            # Backpropagation
+            loss.backward()
+            self.optimizer.step()
+            
+            progress.set_postfix({"Loss": loss.item()})
+            
+            # Store examples
+            if epoch % 100 == 0:
+                self.true_states.append(true_state)
+                self.reconstructed_states.append(reconstructed.detach().cpu().numpy())
+    
+    def visualize_results(self):
+        """Compare true vs reconstructed states"""
+        plt.figure(figsize=(15, 6))
+        
+        # Select random example
+        idx = np.random.randint(len(self.true_states))
+        true_state = self.true_states[idx]
+        recon_state = self.reconstructed_states[idx]
+        
+        # Normalize reconstructed state
+        recon_state = recon_state / np.linalg.norm(recon_state)
+        
+        # Plot true state
+        plt.subplot(1, 2, 1)
+        plot_bloch_multivector(true_state)
+        plt.title("True Quantum State")
+        
+        # Plot reconstructed state
+        plt.subplot(1, 2, 2)
+        plot_bloch_multivector(recon_state)
+        plt.title("Neural Reconstruction")
+        
+        plt.tight_layout()
+        plt.show()
+
+if __name__ == "__main__":
+    print("""
+    ███╗   ██╗███████╗██╗   ██╗██████╗  █████╗ ██╗         ████████╗ ██████╗ ███╗   ███╗ ██████╗ 
+    ████╗  ██║██╔════╝██║   ██║██╔══██╗██╔══██╗██║         ╚══██╔══╝██╔═══██╗████╗ ████║██╔═══██╗
+    ██╔██╗ ██║█████╗  ██║   ██║██████╔╝███████║██║            ██║   ██║   ██║██╔████╔██║██║   ██║
+    ██║╚██╗██║██╔══╝  ██║   ██║██╔══██╗██╔══██║██║            ██║   ██║   ██║██║╚██╔╝██║██║   ██║
+    ██║ ╚████║███████╗╚██████╔╝██║  ██║██║  ██║███████╗       ██║   ╚██████╔╝██║ ╚═╝ ██║╚██████╔╝
+    ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝       ╚═╝    ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ 
+    """)
+    
+    nqt = NeuralQuantumPi()
+    nqt.train(epochs=5000)
+    nqt.visualize_results()
