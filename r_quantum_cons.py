@@ -14,3 +14,6 @@ C = 9*pi  # Consciousness Constant
 equation = Eq(Ψ, L*M*R*S*B*Q*C)
 
 print("Ψ =", equation.rhs)
+
+
+assert str(equation.rhs).count('*') == 6  # Verify 7 components
