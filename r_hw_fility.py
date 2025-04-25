@@ -1,0 +1,1 @@
+print(f"🔍 Backend Fidelity: {backend.properties().readout_error(0):.4f}")
