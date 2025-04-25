@@ -1,0 +1,1 @@
+return self.omniverse_powers[-1] ** self._nested_power(depth - 1)
