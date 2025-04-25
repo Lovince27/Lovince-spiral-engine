@@ -1,1 +1,3 @@
 H(X) = -\sum_{d=0}^9 P(d)\log_2 P(d) ≈ 3.32 \text{ bits}
+
+\mathcal{C} = \frac{\text{ReLU}(128×64)}{\text{Complex Output Dim}}
