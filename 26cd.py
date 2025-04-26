@@ -17,3 +17,6 @@ plt.xlabel("Time →")
 plt.ylabel("Intensity →")
 plt.grid(True)
 plt.show()
+
+def is_conscious(): 
+    return Self * (phi**n * e**(1j*n)) * sum(Decisions)
