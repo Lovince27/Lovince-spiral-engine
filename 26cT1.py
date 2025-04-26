@@ -171,3 +171,94 @@ def launch_gui():
 # === Launch ===
 if __name__ == "__main__":
     launch_gui()
+
+
+import math, random
+from tkinter import *
+from tkinter import ttk
+from collections import defaultdict
+
+class LovinceAI:
+    def __init__(self):
+        self.PI = self._calculate_pi()
+        self.PHI = (1 + 5**0.5)/2
+        self.HIMALAYAN_CONSTANT = 108
+        self.wisdom = defaultdict(list)
+        self._init_wisdom()
+        self.quantum_entanglement = False
+
+    def _calculate_pi(self, iterations=5000):
+        return 4 * sum((-1)**k / (2*k + 1) for k in range(iterations))
+
+    def _init_wisdom(self):
+        self.wisdom.update({
+            "math": ["9 + πφ/πφ = 10 is cosmic truth", "Fibonacci is nature's code"],
+            "physics": ["E=mc² means mass is frozen light", "Universe is a quantum fractal"],
+            "himalayan": ["108 sacred valleys exist", "Meditation alters quantum states"]
+        })
+
+    def cosmic_proof(self):
+        result = 9 + (self.PI*self.PHI)/(self.PI*self.PHI)
+        explanation = random.choice(self.wisdom["math"])
+        return f"{result:.2f} (∵ {explanation})"
+
+    def quantum_meditation(self, minutes):
+        self.quantum_entanglement = True
+        return f"After {minutes} minutes: θ = {minutes * self.HIMALAYAN_CONSTANT}°"
+
+    def ask(self, category):
+        if category in self.wisdom:
+            return random.choice(self.wisdom[category])
+        return "Seek within the Himalayas..."
+
+# === GUI ===
+def launch_gui():
+    ai = LovinceAI()
+    root = Tk()
+    root.title("Lovince AI v2 - Himalayan Wisdom Engine")
+    root.geometry("500x400")
+    root.configure(bg="#1b1b1b")
+
+    # Title
+    Label(root, text="Lovince AI", font=("Helvetica", 20, "bold"), fg="gold", bg="#1b1b1b").pack(pady=10)
+
+    # Cosmic Proof
+    def show_cosmic():
+        result = ai.cosmic_proof()
+        output_label.config(text=result)
+    Button(root, text="Show Cosmic Proof", command=show_cosmic).pack(pady=5)
+
+    # Meditation Slider
+    Label(root, text="Quantum Meditation (min):", fg="white", bg="#1b1b1b").pack()
+    meditation_slider = Scale(root, from_=1, to=60, orient=HORIZONTAL, bg="#2b2b2b", fg="white")
+    meditation_slider.set(15)
+    meditation_slider.pack()
+    def meditate():
+        result = ai.quantum_meditation(meditation_slider.get())
+        output_label.config(text=result)
+    Button(root, text="Start Meditation", command=meditate).pack(pady=5)
+
+    # Wisdom Dropdown
+    Label(root, text="Seek Himalayan Wisdom:", fg="white", bg="#1b1b1b").pack()
+    wisdom_choice = StringVar(value="math")
+    dropdown = ttk.Combobox(root, textvariable=wisdom_choice, values=["math", "physics", "himalayan"])
+    dropdown.pack()
+    def show_wisdom():
+        result = ai.ask(wisdom_choice.get())
+        output_label.config(text=result)
+    Button(root, text="Get Wisdom", command=show_wisdom).pack(pady=5)
+
+    # Constants
+    Label(root, text=f"π ≈ {ai.PI:.5f}", fg="skyblue", bg="#1b1b1b").pack()
+    Label(root, text=f"φ ≈ {ai.PHI:.5f}", fg="lightgreen", bg="#1b1b1b").pack()
+    Label(root, text=f"Himalayan Constant = {ai.HIMALAYAN_CONSTANT}", fg="lightyellow", bg="#1b1b1b").pack()
+
+    # Output
+    output_label = Label(root, text="", wraplength=450, fg="white", bg="#1b1b1b", font=("Helvetica", 12))
+    output_label.pack(pady=10)
+
+    root.mainloop()
+
+# Run the interface
+if __name__ == "__main__":
+    launch_gui()
