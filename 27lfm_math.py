@@ -101,3 +101,113 @@ result = lovince_formula(x, t, r, theta, a, b, m1, m2)
 
 # Output the result
 print(f"Lovince formula result: {result}")
+
+#!/usr/bin/env python3
+import math
+import matplotlib.pyplot as plt
+import argparse
+from functools import lru_cache
+
+# Lovince Spiral Sequence: a_n = a_{n-1} + floor(sqrt(n))
+def lovince_spiral_sequence(n):
+    """Compute Lovince Spiral Sequence up to n terms."""
+    if not isinstance(n, int) or n < 1:
+        raise ValueError("n must be a positive integer")
+    sequence = [1]  # a_1 = 1
+    for i in range(2, n + 1):
+        sequence.append(sequence[-1] + math.floor(math.sqrt(i)))
+    return sequence
+
+# Lovince Harmony Equation: H_n = sum_{k=1}^n 1 / (k^2 + sqrt(k))
+@lru_cache(maxsize=128)
+def lovince_harmony(n):
+    """Compute Lovince Harmony sum for n terms (cached for performance)."""
+    if not isinstance(n, int) or n < 1:
+        raise ValueError("n must be a positive integer")
+    return sum(1 / (k**2 + math.sqrt(k)) for k in range(1, n + 1))
+
+# Lovince Energy Flux: Phi = E / (r^2 + k * sin(omega * t))
+def lovince_energy_flux(E, r, k, omega, t):
+    """Compute Lovince Energy Flux at time t."""
+    if r <= 0 or E < 0:
+        raise ValueError("E must be non-negative, r must be positive")
+    denominator = r**2 + k * math.sin(omega * t)
+    if abs(denominator) < 1e-10:
+        raise ValueError("Denominator too close to zero")
+    return E / denominator
+
+# Lovince Universal Model: S_n = a_n * H_n * Phi(t, r)
+def lovince_universal_model(n, E, r, k, omega, t):
+    """Compute Lovince Universal Model state at step n."""
+    a_n = lovince_spiral_sequence(n)[-1]
+    H_n = lovince_harmony(n)
+    Phi = lovince_energy_flux(E, r, k, omega, t)
+    return a_n * H_n * Phi
+
+# Main function to run and visualize the model
+def run_lovince_model(n_max, E, r, k, omega, dynamic_t=False):
+    """Run Lovince Universal Model and plot results."""
+    states = []
+    fluxes = []
+    n_values = range(1, n_max + 1)
+    t_values = [n / 10.0 if dynamic_t else 1.0 for n in n_values]  # Dynamic or fixed time
+    
+    for n, t in zip(n_values, t_values):
+        try:
+            S_n = lovince_universal_model(n, E, r, k, omega, t)
+            Phi = lovince_energy_flux(E, r, k, omega, t)
+            states.append(S_n)
+            fluxes.append(Phi)
+        except ValueError as e:
+            print(f"Error at n={n}: {e}")
+            return None
+    
+    # Visualization: Dual plots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    
+    # Plot S_n vs n
+    ax1.plot(n_values, states, marker='o', linestyle='-', color='b', label='S_n')
+    ax1.set_title('Lovince Universal Model: System State')
+    ax1.set_xlabel('Step (n)')
+    ax1.set_ylabel('S_n (W/m²)')
+    ax1.grid(True)
+    ax1.legend()
+    
+    # Plot Phi vs t
+    ax2.plot(t_values, fluxes, marker='s', linestyle='--', color='r', label='Phi')
+    ax2.set_title('Lovince Energy Flux')
+    ax2.set_xlabel('Time (s)')
+    ax2.set_ylabel('Phi (W/m²)')
+    ax2.grid(True)
+    ax2.legend()
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return states, t_values, fluxes
+
+# Parse command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="Lovince Universal Model: A powerful dynamic system simulator.")
+    parser.add_argument('--n_max', type=int, default=10, help='Maximum step (default: 10)')
+    parser.add_argument('--E', type=float, default=100.0, help='Energy in watts (default: 100)')
+    parser.add_argument('--r', type=float, default=2.0, help='Distance in meters (default: 2)')
+    parser.add_argument('--k', type=float, default=1.0, help='Damping constant (default: 1)')
+    parser.add_argument('--omega', type=float, default=math.pi, help='Angular frequency (default: pi)')
+    parser.add_argument('--dynamic_t', action='store_true', help='Use dynamic time (t=n/10) instead of t=1')
+    return parser.parse_args()
+
+# Main execution
+if __name__ == "__main__":
+    args = parse_args()
+    
+    print("Running Lovince Universal Model...")
+    print(f"Parameters: n_max={args.n_max}, E={args.E}, r={args.r}, k={args.k}, omega={args.omega}, dynamic_t={args.dynamic_t}")
+    
+    results = run_lovince_model(args.n_max, args.E, args.r, args.k, args.omega, args.dynamic_t)
+    
+    if results:
+        states, t_values, fluxes = results
+        print("\nResults:")
+        for n, t, S_n, Phi in zip(range(1, args.n_max + 1), t_values, states, fluxes):
+            print(f"n={n}, t={t:.2f}s: S_n ≈ {S_n:.2f} W/m², Phi ≈ {Phi:.2f} W/m²")
