@@ -146,3 +146,117 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+import math
+import logging
+from scipy.constants import hbar, c, G, fine_structure
+import numpy as np
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Planck Constants (CODATA 2018, via scipy.constants)
+PLANCK_ENERGY = math.sqrt((hbar * c**5) / G)  # J, ≈ 1.956e9 J
+PLANCK_TIME = math.sqrt((hbar * G) / c**5)    # s, ≈ 5.391e-44 s
+PLANCK_LENGTH = math.sqrt((hbar * G) / c**3)  # m, ≈ 1.616e-35 m
+
+# Inputs (Calibrated)
+CBM = 5.10e-19                 # Consciousness Bridge Metric (Joules)
+ENTROPY = 3.1989               # Shannon entropy (bits)
+FRACTAL_DIM = 1.3234           # Fractal dimension (unitless)
+MUTUAL_INFO = 0.1789           # Mutual information (bits)
+PHI = 0.1456                   # Integrated information (Φ, unitless)
+ENERGY_RATIO = 2.51e-3         # Energy ratio (unitless, calibrated)
+MACRO_SCALE = 1.0e-6           # Reference length scale (meters, neural scale)
+
+def validate_inputs() -> None:
+    """Validate input parameters for physical and numerical plausibility."""
+    checks = [
+        (CBM <= 0 or CBM > PLANCK_ENERGY, "CBM must be in (0, Planck Energy]"),
+        (ENTROPY <= 0 or ENTROPY > 10, "Entropy should be in (0, 10] bits"),
+        (FRACTAL_DIM < 1 or FRACTAL_DIM > 2, "Fractal dimension should be in [1, 2]"),
+        (MUTUAL_INFO < 0 or MUTUAL_INFO > ENTROPY, "Mutual information must be in [0, ENTROPY]"),
+        (PHI < 0 or PHI > 1, "Integrated information Φ should be in [0, 1]"),
+        (ENERGY_RATIO <= 0, "Energy ratio must be positive"),
+        (MACRO_SCALE <= 0 or MACRO_SCALE > 1.0, "Macro scale should be in (0, 1] meters for neural systems"),
+    ]
+    for condition, message in checks:
+        if condition:
+            raise ValueError(message)
+    logging.info("All input parameters are physically plausible.")
+
+def check_numerical_stability(value: float, name: str, min_val: float = 1e-300, max_val: float = 1e300) -> None:
+    """Check if a value is within safe numerical bounds."""
+    if not (min_val < abs(value) < max_val):
+        raise ValueError(f"{name} = {value:.3e} is outside safe numerical bounds [{min_val:.3e}, {max_val:.3e}]")
+
+def calculate_qcm() -> tuple[float, float, float]:
+    """
+    Compute the Quantum Consciousness Metric (QCM) with Planck-scale corrections.
+    """
+    try:
+        # LHS
+        cbm_norm = CBM / PLANCK_ENERGY
+        scale_ratio = (PLANCK_LENGTH / MACRO_SCALE) ** 2
+        lhs = cbm_norm * (ENTROPY * FRACTAL_DIM) * scale_ratio
+        check_numerical_stability(lhs, "LHS")
+        logging.info(f"LHS: cbm_norm = {cbm_norm:.3e}, scale_ratio = {scale_ratio:.3e}, lhs = {lhs:.3e}")
+
+        # RHS
+        mutual_info_term = (MUTUAL_INFO ** 2) * PHI
+        time_norm = mutual_info_term / PLANCK_TIME
+        energy_norm = (ENERGY_RATIO / PLANCK_ENERGY) ** 0.25
+        rhs = time_norm * energy_norm
+        check_numerical_stability(rhs, "RHS (pre-correction)")
+        logging.info(f"RHS: mutual_info_term = {mutual_info_term:.3e}, time_norm = {time_norm:.3e}, energy_norm = {energy_norm:.3e}, rhs = {rhs:.3e}")
+
+        # Holographic Correction
+        planck_area = PLANCK_LENGTH ** 2
+        macro_area = MACRO_SCALE ** 2
+        black_hole_entropy = (math.pi * macro_area) / planck_area
+        check_numerical_stability(black_hole_entropy, "Black Hole Entropy")
+        rhs_corrected = rhs * black_hole_entropy
+        check_numerical_stability(rhs_corrected, "RHS (corrected)")
+        logging.info(f"Holographic Correction: macro_area = {macro_area:.3e}, planck_area = {planck_area:.3e}, black_hole_entropy = {black_hole_entropy:.3e}, rhs_corrected = {rhs_corrected:.3e}")
+
+        # QCM
+        alpha = fine_structure
+        qcm = lhs * rhs_corrected * (alpha ** 3)
+        check_numerical_stability(qcm, "QCM")
+        logging.info(f"QCM: alpha^3 = {(alpha ** 3):.3e}, qcm = {qcm:.6f}")
+        return qcm, lhs, rhs_corrected
+
+    except ZeroDivisionError as e:
+        raise ValueError(f"Division by zero: {str(e)}. Check PLANCK_TIME, PLANCK_ENERGY, or MACRO_SCALE.")
+    except Exception as e:
+        raise ValueError(f"Calculation error: {str(e)}. Review inputs and numerical stability.")
+
+def verify_qcm(qcm: float, tolerance: float = 1e-2) -> None:
+    """Verify if QCM is close to unity."""
+    if math.isclose(qcm, 1.0, rel_tol=tolerance):
+        logging.info("✅ QCM matches Planck-scale expectation within tolerance.")
+        print("✅ QCM matches Planck-scale expectation within tolerance.")
+    else:
+        deviation = abs(qcm - 1.0)
+        logging.warning(f"❌ QCM deviates from unity by {deviation:.3e}. Calibration needed.")
+        print(f"❌ QCM deviates from unity by {deviation:.3e}. Calibration needed.")
+
+def main():
+    print("=== Quantum Consciousness Metric (QCM) Calculation ===\n")
+    try:
+        validate_inputs()
+        qcm, lhs, rhs_corrected = calculate_qcm()
+        print(f"LHS (Quantum-Classical Bridge): {lhs:.3e}")
+        print(f"RHS (Quantum Gravity with Holographic Correction): {rhs_corrected:.3e}")
+        print(f"QCM (Final Dimensionless Metric): {qcm:.6f}\n")
+        verify_qcm(qcm)
+    except ValueError as e:
+        logging.error(f"Error: {str(e)}")
+        print(f"Error: {str(e)}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {str(e)}")
+        print(f"Unexpected error: {str(e)}")
+
+if __name__ == "__main__":
+    main()
