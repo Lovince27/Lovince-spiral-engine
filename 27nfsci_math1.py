@@ -143,3 +143,47 @@ def lovince_final_extended_model(n, E, r, k, omega, t, theta, phi, epsilon):
     quantum_boost = 1 + (math.sin(theta) / math.cos(theta + phi))
     gravity_adjustment = 1 / (r**2 + epsilon * math.sin(omega * t))
     return S_n * quantum_boost * gravity_adjustment
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants for the formula
+G = 6.67430e-11  # Gravitational constant in m^3 kg^-1 s^-2
+M = 5.972e24  # Mass of the central body (Earth) in kg
+alpha = 0.15  # Lovince correction factor (adjusted)
+beta = 2.5  # Damping exponent (adjusted)
+omega = 1.2  # Angular frequency in rad/s (adjusted)
+
+# Function to calculate the Lovince energy
+def lovince_energy(m, v, r, t):
+    """Calculate energy using Lovince Energy Dynamics Formula"""
+    # Classical kinetic and potential energy
+    classical_energy = 0.5 * m * v**2 + (G * M * m) / r
+    # Correction factor for quantum-gravity and time dynamics
+    correction_factor = 1 + (alpha * np.sin(omega * t)) / r**beta
+    return classical_energy * correction_factor
+
+# Parameters
+m = 5.0  # Mass of object in kg (adjusted for better visualization)
+v = 5000  # Velocity in m/s (adjusted for higher speed)
+t_values = np.linspace(0, 20, 100)  # Time from 0 to 20 seconds (adjusted for longer time span)
+r_values = np.linspace(1e7, 1e9, 100)  # Distance from 10 million to 1 billion meters (adjusted)
+
+# Create a grid for the calculations
+R, T = np.meshgrid(r_values, t_values)
+E = lovince_energy(m, v, R, T)  # Calculate energy at each point in the grid
+
+# Plotting Energy vs Distance vs Time
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(R, T, E, cmap='plasma')
+
+# Labels and title
+ax.set_xlabel('Distance (m)')
+ax.set_ylabel('Time (s)')
+ax.set_zlabel('Energy (Joules)')
+ax.set_title('Energy vs Distance vs Time (Lovince Energy Dynamics)')
+
+# Show plot
+plt.show()
