@@ -79,3 +79,72 @@ def combined_product():
 if __name__ == "__main__":
     display_constants()
     combined_product()
+
+
+# advanced_irrational_blend.py
+
+from decimal import Decimal, getcontext
+import math
+
+# Set precision high enough to extract many digits
+getcontext().prec = 110
+
+# List of quadratic irrationals to blend (square roots of primes)
+primes = [2, 3, 5, 7, 11]
+
+def get_sqrt_decimal(prime, digits=100):
+    """
+    Compute the square root of a prime number with high precision,
+    return the decimal digits as a string (without the integer part).
+    """
+    root = Decimal(prime).sqrt()
+    s = str(root)
+    if '.' in s:
+        _, dec_part = s.split('.')
+        return dec_part[:digits]
+    else:
+        return '0' * digits
+
+def blend_digits(digit_lists):
+    """
+    Blend digits from multiple decimal digit strings by interleaving them.
+    """
+    blended = []
+    max_len = max(len(d) for d in digit_lists)
+    for i in range(max_len):
+        for digits in digit_lists:
+            if i < len(digits):
+                blended.append(digits[i])
+    return ''.join(blended)
+
+def main():
+    digits_per_constant = 100  # Number of digits to extract from each sqrt
+    digit_lists = []
+
+    print("Extracting decimal digits from square roots of primes:")
+    for p in primes:
+        dec_digits = get_sqrt_decimal(p, digits_per_constant)
+        digit_lists.append(dec_digits)
+        print(f"√{p} decimal digits (first {digits_per_constant}): {dec_digits[:50]}...")
+
+    blended_sequence = blend_digits(digit_lists)
+    print("\nBlended decimal sequence (first 500 digits):")
+    print(blended_sequence[:500])
+
+    # Optional: simple check for repeating patterns
+    def has_repeating_pattern(s, min_len=3, max_len=10):
+        for length in range(min_len, max_len + 1):
+            for start in range(len(s) - 2*length + 1):
+                if s[start:start+length] == s[start+length:start+2*length]:
+                    return True, s[start:start+length]
+        return False, None
+
+    repeating, pattern = has_repeating_pattern(blended_sequence)
+    if repeating:
+        print(f"\n⚠️ Repeating pattern detected: '{pattern}'")
+    else:
+        print("\n✅ No repeating pattern detected in blended sequence.")
+
+if __name__ == "__main__":
+    main()
+
