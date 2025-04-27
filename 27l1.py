@@ -449,3 +449,210 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+from decimal import Decimal, getcontext
+import math
+from typing import List, Tuple
+
+class UnifiedQuantumConsciousnessModel:
+    def __init__(self, precision: int = 50, digit_limit: int = 30, max_iterations: int = 5, hidden_nodes: int = 4):
+        getcontext().prec = precision
+        self.digit_limit = digit_limit
+        self.max_iterations = max_iterations
+        self.hidden_nodes = hidden_nodes
+
+        # Constants with high precision
+        self.constants = {
+            "phi": (Decimal(1) + Decimal(5).sqrt()) / 2,
+            "sqrt2": Decimal(2).sqrt(),
+            "pi": Decimal(str(math.pi)),
+            "e": Decimal(str(math.e)),
+            "h": Decimal("6.62607015E-34"),
+            "ħ": Decimal("1.054571817E-34"),
+            "m_e": Decimal("9.1093837E-31")
+        }
+
+        # Neural weights initialization (simple uniform)
+        self.input_weights = [Decimal("0.5")] * (len(self.constants) + 2)
+        self.hidden_weights = [[Decimal("0.5") for _ in self.input_weights] for _ in range(self.hidden_nodes)]
+        self.output_weights = [Decimal(1) / self.hidden_nodes for _ in range(self.hidden_nodes)]
+
+        # Collatz start number
+        self.collatz_start = 27
+
+    def collatz_sequence(self, start: int) -> List[int]:
+        seq = []
+        n = start
+        while n != 1:
+            seq.append(n)
+            n = n // 2 if n % 2 == 0 else 3 * n + 1
+        seq.append(1)
+        return seq
+
+    def extract_digits(self, number: Decimal) -> str:
+        s = str(number.normalize())
+        if '.' in s:
+            return s.split('.')[1][:self.digit_limit].rstrip('0')
+        else:
+            return ''
+
+    def sequence_entropy(self, seq: str) -> Decimal:
+        if not seq:
+            return Decimal(0)
+        counts = {str(i): 0 for i in range(10)}
+        for ch in seq:
+            if ch in counts:
+                counts[ch] += 1
+        total = sum(counts.values())
+        entropy = Decimal(0)
+        for c in counts.values():
+            if c > 0:
+                p = Decimal(c) / total
+                entropy -= p * Decimal(math.log2(float(p)))
+        return entropy
+
+    def sigmoid(self, x: Decimal) -> Decimal:
+        try:
+            val = Decimal(1) / (1 + Decimal(math.exp(-float(x))))
+            return val
+        except OverflowError:
+            return Decimal(0) if x < 0 else Decimal(1)
+
+    def compute_hidden_layer(self, inputs: List[str]) -> List[Decimal]:
+        outputs = []
+        for j in range(self.hidden_nodes):
+            s = Decimal(0)
+            for i, seq in enumerate(inputs):
+                avg_digit = Decimal(sum(int(d) for d in seq if d.isdigit())) / max(1, len(seq))
+                s += avg_digit * self.input_weights[i] * self.hidden_weights[j][i]
+            outputs.append(self.sigmoid(s))
+        return outputs
+
+    def blend_output(self, hidden_outputs: List[Decimal]) -> str:
+        blended = []
+        for _ in range(self.digit_limit):
+            val = sum(h * w for h, w in zip(hidden_outputs, self.output_weights))
+            digit = int((val * 10) % 10)
+            blended.append(str(digit))
+        return ''.join(blended)
+
+    def mutual_information(self, seq1: str, seq2: str) -> Decimal:
+        if not seq1 or not seq2 or len(seq1) != len(seq2):
+            return Decimal(0)
+        total = len(seq1)
+        joint_counts = {(i, j): 0 for i in range(10) for j in range(10)}
+        counts1 = {str(i): 0 for i in range(10)}
+        counts2 = {str(i): 0 for i in range(10)}
+
+        for a, b in zip(seq1, seq2):
+            if a.isdigit() and b.isdigit():
+                ia, ib = int(a), int(b)
+                joint_counts[(ia, ib)] += 1
+                counts1[a] += 1
+                counts2[b] += 1
+
+        mi = Decimal(0)
+        for i in range(10):
+            for j in range(10):
+                p_xy = Decimal(joint_counts[(i, j)]) / total if total > 0 else Decimal(0)
+                p_x = Decimal(counts1[str(i)]) / total if total > 0 else Decimal(0)
+                p_y = Decimal(counts2[str(j)]) / total if total > 0 else Decimal(0)
+                if p_xy > 0 and p_x > 0 and p_y > 0:
+                    mi += p_xy * Decimal(math.log2(float(p_xy / (p_x * p_y))))
+        return mi
+
+    def calculate_cbm(self, entropy: Decimal, mi: Decimal, hidden_outputs: List[Decimal]) -> Decimal:
+        # Simple metric combining entropy, mutual info, and hidden activation average
+        avg_hidden = sum(hidden_outputs) / len(hidden_outputs) if hidden_outputs else Decimal(0)
+        cbm = entropy * (Decimal(1) + mi) * (Decimal(1) + avg_hidden)
+        return cbm
+
+    def self_update_weights(self, inputs: List[str], cbm: Decimal, hidden_outputs: List[Decimal]) -> None:
+        lr = Decimal("0.05")
+        for i in range(len(self.input_weights)):
+            delta = lr * cbm * Decimal(sum(int(d) for d in inputs[i] if d.isdigit())) / max(1, len(inputs[i]))
+            self.input_weights[i] = min(Decimal(1), max(Decimal("0.1"), self.input_weights[i] + delta))
+
+        for j in range(self.hidden_nodes):
+            for i in range(len(self.input_weights)):
+                delta = lr * cbm * hidden_outputs[j]
+                self.hidden_weights[j][i] = min(Decimal(1), max(Decimal("0.1"), self.hidden_weights[j][i] + delta))
+
+        for j in range(self.hidden_nodes):
+            delta = lr * cbm * hidden_outputs[j]
+            self.output_weights[j] = min(Decimal(1), max(Decimal("0.1"), self.output_weights[j] + delta))
+
+        # Normalize output weights
+        total = sum(self.output_weights)
+        if total > 0:
+            self.output_weights = [w / total for w in self.output_weights]
+
+    def validate(self, inputs: List[str], blended: str, cbm: Decimal) -> bool:
+        if any(len(seq) > self.digit_limit for seq in inputs):
+            return False
+        if len(blended) > self.digit_limit:
+            return False
+        if not cbm.is_finite():
+            return False
+        if any(w <= 0 or not w.is_finite() for w in self.output_weights):
+            return False
+        return True
+
+    def analyze(self) -> None:
+        print("=== Simplified Quantum Consciousness Model ===")
+
+        prev_blended = ""
+        prev_cbm = Decimal(0)
+
+        for iteration in range(1, self.max_iterations + 1):
+            # Prepare inputs: digits from constants + collatz digits
+            const_digits = [self.extract_digits(val) for val in self.constants.values()]
+            collatz_seq = self.collatz_sequence(self.collatz_start)
+            collatz_digits = ''.join(str(n) for n in collatz_seq)[:self.digit_limit]
+            inputs = const_digits + [collatz_digits]
+
+            # Add previous blended modulated digits if available
+            if prev_blended:
+                modulated = ''.join(str((int(d) * iteration) % 10) for d in prev_blended[:self.digit_limit])
+                inputs.append(modulated)
+
+            # Compute hidden layer outputs
+            hidden_outputs = self.compute_hidden_layer(inputs)
+
+            # Blend outputs
+            blended = self.blend_output(hidden_outputs)
+
+            # Compute entropy and mutual information
+            entropy = self.sequence_entropy(blended)
+            mi = self.mutual_information(collatz_digits, blended)
+
+            # Calculate CBM
+            cbm = self.calculate_cbm(entropy, mi, hidden_outputs)
+
+            # Validate
+            valid = self.validate(inputs, blended, cbm)
+
+            # Print iteration summary
+            print(f"\nIteration {iteration}:")
+            print(f"Blended sequence (first {self.digit_limit} digits): {blended}")
+            print(f"Entropy: {entropy:.4f}")
+            print(f"Mutual Information (Collatz vs Blended): {mi:.4f}")
+            print(f"Consciousness Bridge Metric (CBM): {cbm:.4e}")
+            print(f"Validation: {'Passed ✅' if valid else 'Failed ⚠️'}")
+            print(f"Hidden layer outputs: {[float(h) for h in hidden_outputs]}")
+
+            # Self-update weights if valid
+            if valid:
+                self.self_update_weights(inputs, cbm, hidden_outputs)
+
+            # Update for next iteration
+            prev_blended = blended
+            prev_cbm = cbm
+
+def main():
+    model = UnifiedQuantumConsciousnessModel()
+    model.analyze()
+
+if __name__ == "__main__":
+    main()
