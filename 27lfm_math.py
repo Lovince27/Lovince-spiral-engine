@@ -211,3 +211,54 @@ if __name__ == "__main__":
         print("\nResults:")
         for n, t, S_n, Phi in zip(range(1, args.n_max + 1), t_values, states, fluxes):
             print(f"n={n}, t={t:.2f}s: S_n ≈ {S_n:.2f} W/m², Phi ≈ {Phi:.2f} W/m²")
+
+
+import math
+
+# Lovince Spiral Sequence
+def lovince_spiral_sequence(n):
+    sequence = [1]  # a_1 = 1
+    for i in range(2, n + 1):
+        sequence.append(sequence[-1] + math.floor(math.sqrt(i)))
+    return sequence
+
+# Lovince Harmony
+def lovince_harmony(n):
+    return sum(1 / (k**2 + math.sqrt(k)) for k in range(1, n + 1))
+
+# Lovince Energy Flux
+def lovince_energy_flux(E, r, k, omega, t):
+    return E / (r**2 + k * math.sin(omega * t))
+
+# Gravitational Force Contribution
+def gravitational_force(G, M1, M2, r):
+    return (G * M1 * M2) / r**2
+
+# Entropy Function
+def entropy(t):
+    return math.log(t + 1)
+
+# Core Lovince Universal Model Function
+def lovince_universal_model(n, E, r, k, omega, t, G, M1, M2):
+    a_n = lovince_spiral_sequence(n)[-1]
+    H_n = lovince_harmony(n)
+    Phi = lovince_energy_flux(E, r, k, omega, t)
+    grav_force = gravitational_force(G, M1, M2, r)
+    entropy_factor = 1 / math.sqrt(t**2 + entropy(t))
+    
+    S_n = (a_n * H_n * Phi) * (1 + grav_force) * entropy_factor
+    return S_n
+
+# Test the function with sample values
+n = 10
+E = 100
+r = 5
+k = 0.5
+omega = math.pi
+t = 2
+G = 6.67430e-11  # Gravitational constant (m^3 kg^-1 s^-2)
+M1 = 1.0e24  # Mass of object 1 (kg)
+M2 = 1.0e24  # Mass of object 2 (kg)
+
+S_n = lovince_universal_model(n, E, r, k, omega, t, G, M1, M2)
+print(f"Lovince Universal Model S_n = {S_n:.5f}")
