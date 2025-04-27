@@ -148,3 +148,37 @@ def main():
 if __name__ == "__main__":
     main()
 
+# z_sequence.py
+
+from decimal import Decimal, getcontext
+import math
+
+# Set high precision for calculations involving irrationals
+getcontext().prec = 50
+
+def compute_phi():
+    return (Decimal(1) + Decimal(5).sqrt()) / 2
+
+def compute_Zn(n):
+    phi = compute_phi()
+    pi = Decimal(str(math.pi))
+    base = phi * (pi ** 3) / 3
+    multiplier = Decimal(9) * (base ** n)
+    vector = [
+        Decimal(17) / 12,
+        Decimal(17) / 10,
+        Decimal(161) / 72,
+        Decimal(29) / 11,
+        Decimal(239) / 72
+    ]
+    Zn = [multiplier * v for v in vector]
+    return Zn
+
+if __name__ == "__main__":
+    n = int(input("Enter n: "))
+    Zn = compute_Zn(n)
+    print(f"Z_{n} = [")
+    for val in Zn:
+        print(f"  {val}")
+    print("]")
+
