@@ -111,3 +111,35 @@ if __name__ == "__main__":
         print("\nResults:")
         for n, S_n in zip(range(1, args.n_max + 1), results):
             print(f"n={n}: S_n ≈ {S_n:.4e} W/m²")
+
+
+import math
+from functools import lru_cache
+
+def lovince_spiral_sequence(n):
+    sequence = [1]
+    for i in range(2, n + 1):
+        sequence.append(sequence[-1] + math.floor(math.sqrt(i)))
+    return sequence
+
+@lru_cache(maxsize=128)
+def lovince_harmony(n):
+    return sum(1 / (k**2 + math.sqrt(k)) for k in range(1, n + 1))
+
+def lovince_energy_flux(E, r, k, omega, t):
+    denominator = r**2 + k * math.sin(omega * t)
+    if abs(denominator) < 1e-10:
+        raise ValueError("Denominator too close to zero")
+    return E / denominator
+
+def lovince_universal_model(n, E, r, k, omega, t):
+    a_n = lovince_spiral_sequence(n)[-1]
+    H_n = lovince_harmony(n)
+    Phi = lovince_energy_flux(E, r, k, omega, t)
+    return a_n * H_n * Phi
+
+def lovince_final_extended_model(n, E, r, k, omega, t, theta, phi, epsilon):
+    S_n = lovince_universal_model(n, E, r, k, omega, t)
+    quantum_boost = 1 + (math.sin(theta) / math.cos(theta + phi))
+    gravity_adjustment = 1 / (r**2 + epsilon * math.sin(omega * t))
+    return S_n * quantum_boost * gravity_adjustment
