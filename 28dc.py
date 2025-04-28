@@ -140,3 +140,10 @@ plt.title("Lovince Formula (Quantum-Geometric System)", fontsize=14)
 plt.legend()
 plt.grid(True, linestyle="--", alpha=0.6)
 plt.show()
+
+def lovince_formula(x, t, r, theta, k, v, E0):
+    wave_term = (np.exp(1j * k * x) / (x**2 + r**2)) * (np.sin(theta) / x) * h_bar * v * r**2
+    geometric_term = (np.pi * r**2 / 2) * (E0 / (1e-18))
+    dynamic_term = (v * x * np.cos(theta) * h_bar) / r**2
+    energy_term = E0
+    return wave_term + geometric_term + dynamic_term + energy_term
