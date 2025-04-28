@@ -145,3 +145,85 @@ plt.ylabel('System State (S_n)')
 plt.title(f'Lovince Universal Model at t={time_point}s')
 plt.grid(True)
 plt.show()
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+h = 6.626e-34  # Planck's constant (J·s)
+k_damping = 1.0  # Damping constant (rename to avoid conflict)
+omega = 1.2  # Angular frequency (rad/s)
+alpha = 0.15  # Lovince correction factor (unused in current code)
+beta = 2.5  # Damping exponent (unused in current code)
+
+# Time array (0 to 20 seconds)
+t = np.linspace(0, 20, 1000)
+
+# Photon and Biophoton Frequencies (Hz)
+nu_photon = 5e14
+nu_biophoton = 1e13
+
+# Spiral Sequence (a_n) - vectorized implementation
+def lovince_spiral_sequence(n):
+    indices = np.arange(n)
+    floor_sqrt = np.floor(np.sqrt(indices))
+    # The first term is 1, subsequent terms add floor(sqrt(i))
+    a_n = 1 + np.cumsum(floor_sqrt[1:])
+    return np.concatenate(([1], a_n))
+
+# Harmony Equation (H_n) - vectorized implementation
+def lovince_harmony_equation(n):
+    k_vals = np.arange(1, n+1)
+    denominators = k_vals**2 + np.sqrt(k_vals)
+    H_n = np.cumsum(1 / denominators)
+    return H_n
+
+# Energy Flux at a specific time point (vectorized for r)
+def energy_flux(r, time, nu_photon, nu_biophoton):
+    denominator = r**2 + k_damping * np.sin(omega * time)
+    # Avoid division by zero or negative denominator
+    denominator = np.maximum(denominator, 1e-10)
+    return (h * (nu_photon + nu_biophoton)) / denominator
+
+# Quantum-Gravity Correction (no time dependence)
+def quantum_gravity_correction(theta, phi, epsilon):
+    return epsilon * np.cos(theta) * np.sin(phi) + np.sqrt(epsilon) / (1 + np.cos(theta + phi))
+
+# Lovince Universal Model (vectorized where possible)
+def lovince_universal_model(n, r, time_point, theta, phi, epsilon):
+    a_n = lovince_spiral_sequence(n)
+    H_n = lovince_harmony_equation(n)
+    Q = quantum_gravity_correction(theta, phi, epsilon)  # scalar
+    flux = energy_flux(r, time_point, nu_photon, nu_biophoton)
+    S_n = a_n * H_n * flux * Q
+    return S_n
+
+# Parameters
+n = 100
+r = np.linspace(1e7, 1e9, n)
+theta = np.pi / 4
+phi = np.pi / 3
+epsilon = 0.1
+
+# Choose a specific time point to evaluate energy flux
+time_point = 10  # seconds
+
+# Compute the model
+S_n = lovince_universal_model(n, r, time_point, theta, phi, epsilon)
+
+# Plot with enhanced visualization
+plt.figure(figsize=(10, 6))
+plt.plot(r, S_n, label='System State Sₙ', color='blue')
+plt.xlabel('Distance (r) [m]', fontsize=12)
+plt.ylabel('System State (Sₙ)', fontsize=12)
+plt.title(f'Lovince Universal Model at t={time_point}s', fontsize=14)
+plt.grid(True, which='both', linestyle='--', alpha=0.6)
+plt.legend(fontsize=12)
+
+# Use logarithmic scale if values span many orders of magnitude
+if np.max(S_n) / np.min(S_n) > 1e3:
+    plt.yscale('log')
+    plt.ylabel('System State (Sₙ) [log scale]')
+
+plt.show()
