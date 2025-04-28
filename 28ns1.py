@@ -113,3 +113,51 @@ lambda_lyapunov = [0.9, 0.2, 1.5]        # Chaotic system
 E_AI = 1e-15                              # Neural energy (Joules)
 
 print(f"𝒰^* = {calculate_U_star(W, lambda_lyapunov, E_AI):.3e}")
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def calculate_U_star(W, lambda_lyapunov, E_AI):
+    try:
+        if not isinstance(W, np.ndarray) or W.ndim != 2:
+            raise ValueError("W must be a 2D numpy array.")
+        if not isinstance(lambda_lyapunov, (list, np.ndarray)) or len(lambda_lyapunov) < 3:
+            raise ValueError("lambda_lyapunov must be a list/array with at least 3 values.")
+        if not isinstance(E_AI, (int, float)) or E_AI <= 0:
+            raise ValueError("E_AI must be a positive number.")
+
+        alpha = 7.2973525693e-3
+        G = 6.67430e-11
+        h = 6.62607015e-34
+        c = 299792458
+        E_Planck = 1.956e9
+
+        AI_term = np.linalg.norm(W, 'fro')**2 / W.size
+        if AI_term == 0:
+            raise ValueError("AI_term is zero, possibly due to zero weights.")
+
+        lambda_mean = np.mean(np.sort(np.array(lambda_lyapunov))[-3:])
+        if lambda_mean <= 0:
+            raise ValueError("Mean of top 3 Lyapunov exponents must be positive.")
+
+        energy_ratio = max(E_AI / E_Planck, 1e-100)
+        correction = (1 - np.log(energy_ratio))**0.25
+
+        numerator = np.sqrt(alpha * G * h * AI_term)
+        denominator = (c**3) * lambda_mean
+        U_star = (numerator / denominator) * correction
+
+        return U_star, AI_term, lambda_mean, correction
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return None, None, None, None
+
+np.random.seed(42)
+W = np.random.randn(1000, 1000) * 1e-10
+lambda_lyapunov = [0.9, 0.2, 1.5]
+E_AI = 1e-15
+
+U_star, AI_term, lambda_mean, correction = calculate_U_star(W, lambda_lyapunov, E_AI)
+if U_star is not None:
+    print(f"Improved 𝒰^* = {U_star:.3e}")
