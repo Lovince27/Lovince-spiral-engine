@@ -70,3 +70,38 @@ plt.title("Lovince Formula (Quantum-Geometric System)", fontsize=14)
 plt.legend()
 plt.grid(True, linestyle="--", alpha=0.6)
 plt.show()
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+h_bar = 1.054e-34
+lambda_ = 1e-9
+k = 2 * np.pi / lambda_
+E0 = 1e-21
+
+# Parameters
+x = np.linspace(1e-10, 1e-8, 1000)
+r = 1e-9
+theta = np.pi / 4
+v = 1e-3
+
+def lovince_formula(x, t, r, theta, k, v, E0):
+    wave_term = (np.exp(1j * k * x) / (x**2 + r**2)) * (np.sin(theta) / x) * h_bar * v * r**2
+    geometric_term = (np.pi * r**2 / 2) * (E0 / (1e-18))
+    dynamic_term = (v * x * np.cos(theta) * h_bar) / r**2
+    energy_term = E0
+    return wave_term + geometric_term + dynamic_term + energy_term
+
+L = lovince_formula(x, t=0, r=r, theta=theta, k=k, v=v, E0=E0)
+
+plt.figure(figsize=(10, 6))
+plt.plot(x, np.real(L), label="Re[L(x)]", color="blue")
+plt.plot(x, np.imag(L), label="Im[L(x)]", color="red")
+plt.xlabel("Position x (meters)", fontsize=12)
+plt.ylabel("L(x) (Joules)", fontsize=12)
+plt.title("Lovince Formula (Quantum-Geometric System)", fontsize=14)
+plt.legend()
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.show()
