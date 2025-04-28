@@ -44,3 +44,35 @@ if np.isclose(LHS, RHS):
     print("LHS equals RHS within numerical precision. Formula is consistent.")
 else:
     print("LHS does not equal RHS. Check the formula or inputs.")
+
+import numpy as np
+from scipy.linalg import svd
+
+# Physics Constants (SI units)
+alpha = 7.2973525693e-3    # Fine-structure constant
+G = 6.67430e-11            # Gravitational constant
+h = 6.62607015e-34         # Planck constant
+c = 299792458              # Speed of light
+
+# AI Term: Neural Network Weights (random example)
+W = np.random.randn(1000, 1000)  # Weight matrix of a trained AI
+N_params = W.size                 # Total parameters
+AI_term = np.trace(W.T @ W) / N_params
+
+# Chaos Term: Max Lyapunov Exponent (logistic map example)
+def lyapunov_exponent(r, iterations=10000):
+    x = 0.5
+    sum_log = 0.0
+    for _ in range(iterations):
+        x = r * x * (1 - x)
+        sum_log += np.log(abs(r - 2 * r * x))
+    return sum_log / iterations
+
+lambda_chaos = lyapunov_exponent(3.9)  # Chaotic regime
+
+# Calculate 𝒰^*
+numerator = np.sqrt(alpha * G * h * AI_term)
+denominator = (c ** 3) * lambda_chaos
+U_star = numerator / denominator
+
+print(f"Refined Universal Constant (𝒰^*) ≈ {U_star:.3e}")
