@@ -166,3 +166,120 @@ plt.show()
 
 # Optional: Save animation (uncomment to save)
 # ani.save("quantum_cosmic_lovince.mp4", writer="ffmpeg", fps=20)
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.colors import hsv_to_rgb
+
+# Physical constants
+h_bar = 1.054e-34      # Reduced Planck's constant (J·s)
+c = 2.998e8            # Speed of light (m/s)
+
+# Dual-scale parameters
+lambda_quantum = 1e-9  # Quantum wavelength (1 nm)
+lambda_cosmic = 1e10   # Cosmic wavelength (10 billion meters)
+k_quantum = 2 * np.pi / lambda_quantum  # Quantum wave number (m⁻¹)
+k_cosmic = 2 * np.pi / lambda_cosmic    # Cosmic wave number (m⁻¹)
+
+# System parameters
+x = np.logspace(8, 12, 1000)  # Logarithmic space from 100M to 1T meters
+r = 1e9                # Characteristic galactic length (1 billion meters)
+theta = np.pi / 4      # Initial angle (45 degrees)
+v = 1e5                # Galactic velocity (100 km/s)
+t = np.linspace(0, 1e-11, 100)  # Time array for animation
+
+# Enhanced visualization parameters
+quantum_amp = 1e15     # Quantum effects amplification
+cosmic_amp = 1e10      # Cosmic effects amplification
+
+def lovince_field(x, t, r, theta, k_q, k_c, v, h_bar, ensemble=True):
+    """
+    Quantum-Cosmic Field Equation with:
+    - Quantum wave effects (nanoscale)
+    - Cosmic wave effects (galactic scale)
+    - Geometric structure
+    - Dynamic motion
+    - Time evolution
+    - Multiverse ensemble averaging
+    """
+    # Time-dependent phase factor
+    time_phase = np.exp(-1j * (c * k_q * t))
+    
+    # Quantum wave term (nanoscale physics)
+    quantum = (quantum_amp * np.exp(1j * k_q * x) * time_phase / (x**2 + r**2)
+    
+    # Cosmic wave term (large-scale physics)
+    cosmic = (cosmic_amp * np.exp(1j * k_c * x) * time_phase / (x**2 + r**2)
+    
+    # Geometric structure term
+    geometry = (np.pi * r**2 / 2) * np.exp(-x/r)
+    
+    # Dynamic motion term
+    dynamics = (v * x * np.exp(-x/(10*r))) / r**2
+    
+    # Ensemble averaging for multiverse effect
+    if ensemble:
+        theta_vals = np.linspace(0, 2*np.pi, 8)
+        ensemble_field = np.zeros_like(x, dtype=complex)
+        for th in theta_vals:
+            ensemble_field += (np.exp(1j * k_q * x * np.cos(th)) * np.exp(-1j * c * k_q * t)
+        quantum *= ensemble_field / len(theta_vals)
+    
+    return (quantum * np.sin(theta) + (cosmic * np.cos(theta)) + geometry + dynamics
+
+# Create figure with dual y-axes
+fig, ax1 = plt.subplots(figsize=(14, 8))
+ax2 = ax1.twinx()
+
+# Initial calculation
+L = lovince_field(x, t[0], r, theta, k_quantum, k_cosmic, v, h_bar)
+
+# Create complex color mapping
+def complex_to_rgb(z):
+    """Convert complex field to HSV color space"""
+    r = np.abs(z)
+    angle = np.angle(z) % (2 * np.pi)
+    h = angle / (2 * np.pi)
+    s = np.ones_like(h)
+    v = np.log(1 + r) / np.log(1 + r.max())
+    return hsv_to_rgb(np.dstack((h, s, v)))
+
+# Plot initial state
+color_field = complex_to_rgb(L).squeeze()
+line1, = ax1.plot(x, np.real(L), 'deepskyblue', label='Real Component', linewidth=2)
+line2, = ax2.plot(x, np.imag(L), 'coral', label='Imaginary Component', linewidth=2)
+scatter = ax1.scatter(x, np.abs(L), c=color_field, s=10, label='Phase Field', alpha=0.7)
+
+# Formatting
+ax1.set_xscale('log')
+ax1.set_xlabel('Spatial Coordinate (meters)', fontsize=14)
+ax1.set_ylabel('Real Amplitude', fontsize=14)
+ax2.set_ylabel('Imaginary Amplitude', fontsize=14)
+ax1.set_title('Quantum-Cosmic Lovince Field Dynamics\nFrom Nanoscale to Galactic Scales', 
+             fontsize=16, pad=20)
+ax1.grid(True, linestyle=':', alpha=0.7)
+ax1.legend(loc='upper left')
+ax2.legend(loc='upper right')
+
+# Animation function
+def update(frame):
+    L = lovince_field(x, t[frame], r, theta, k_quantum, k_cosmic, v, h_bar)
+    color_field = complex_to_rgb(L).squeeze()
+    
+    line1.set_ydata(np.real(L))
+    line2.set_ydata(np.imag(L))
+    scatter.set_offsets(np.column_stack((x, np.abs(L))))
+    scatter.set_color(color_field)
+    
+    return line1, line2, scatter
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=len(t), interval=50, blit=True)
+
+plt.tight_layout()
+plt.show()
+
+# To save the animation (requires ffmpeg):
+# ani.save('quantum_cosmic_evolution.mp4', writer='ffmpeg', fps=20, dpi=300)
