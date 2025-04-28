@@ -434,3 +434,45 @@ while running:
 
 pygame.quit()
 sys.exit()
+
+
++--------------------------------------------------+
+| Cosmic Mode: ON                                  |
+| Time: 10.00 days                                 |
+| Energy Diff: 0.05%                               |
+| TRAPPIST-1e Hab: 0.85 | Bio: 0.35                |
+| TRAPPIST-1f Hab: 0.80 | Bio: 0.30                |
+|                                                  |
+| [Resonance: #####] (Green)                       |
+|                                                  |
+|       .   *   .   *   .                          |
+|     *   .   *   .   *   .                        |
+|   .   *   .   *   .   *   .                      |
+| *   .   *   .   *   .   *   .                    |
+|   .   *   .   * [S1]  *   .   *                  |
+| *   .   * [S2]  *   .   *   .                    |
+|   .   *   .   *   .   *   .   *                  |
+|     *   .   *   .   * [P1]  *   .                |
+|       .   *   .   *   .   * [P2]  *              |
+|                                                  |
+| [TRAPPIST-1e] Microbes: 1500 | O2: 0.22% | 290K  |
+| [=====] (Green, Microbes)                        |
+| [==] (Red, Predators)                            |
+| [====] (Blue, Resources)                         |
+| [Graph: ~~~~~] (Green, ~1500) [o] (Cyan, AI)     |
+|                                                  |
+| [TRAPPIST-1f] Microbes: 1200 | O2: 0.20% | 285K  |
+| [====] (Green, Microbes)                         |
+| [=] (Red, Predators)                             |
+| [===] (Blue, Resources)                          |
+| [Graph: ~~~~] (Green, ~1200) [o] (Cyan, AI)      |
+|                                                  |
+| [Sliders]                                        |
+| Microbe Growth: [o------] 0.010                  |
+| Predator Growth: [o------] 0.005                 |
+| Radioactivity: [o------] 0.010                   |
+| Zoom: [o------] 1.0                              |
+| [Buttons]                                        |
+| [Save Data] [Earth-like] [Extreme Radiation]     |
+| [Cosmic Mode]                                    |
++--------------------------------------------------+
