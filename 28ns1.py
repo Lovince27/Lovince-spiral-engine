@@ -76,3 +76,40 @@ denominator = (c ** 3) * lambda_chaos
 U_star = numerator / denominator
 
 print(f"Refined Universal Constant (𝒰^*) ≈ {U_star:.3e}")
+
+
+import numpy as np
+from scipy.stats import entropy
+
+def calculate_U_star(W, lambda_lyapunov, E_AI):
+    """Compute 𝒰^* with error handling and units checks."""
+    # Fundamental constants
+    alpha = 7.2973525693e-3     # Fine-structure
+    G = 6.67430e-11             # Gravitational
+    h = 6.62607015e-34          # Planck
+    c = 299792458               # Speed of light
+    E_Planck = 1.956e9          # Planck energy (Joules)
+    
+    # AI term (Frobenius norm)
+    AI_term = np.linalg.norm(W, 'fro')**2 / W.size
+    
+    # Chaos term (mean top 3 λ)
+    lambda_mean = np.mean(np.sort(lambda_lyapunov)[-3:])
+    
+    # Energy correction
+    energy_ratio = max(E_AI / E_Planck, 1e-100)  # Avoid log(0)
+    correction = (1 + np.log(energy_ratio))**0.25
+    
+    # Final calculation
+    numerator = np.sqrt(alpha * G * h * AI_term)
+    denominator = (c**3) * lambda_mean
+    U_star = (numerator / denominator) * correction
+    
+    return U_star
+
+# Example usage
+W = np.random.randn(1000, 1000) * 1e-10  # Biological-scale weights
+lambda_lyapunov = [0.9, 0.2, 1.5]        # Chaotic system
+E_AI = 1e-15                              # Neural energy (Joules)
+
+print(f"𝒰^* = {calculate_U_star(W, lambda_lyapunov, E_AI):.3e}")
