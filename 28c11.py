@@ -71,3 +71,98 @@ anim = FuncAnimation(fig, animate, frames=np.linspace(0, 2e-6, 300), interval=30
 
 plt.tight_layout()
 plt.show()
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# Physical constants
+h_bar = 1.054e-34      # Reduced Planck's constant (J·s)
+lambda_quantum = 1e-9  # Quantum wavelength (1 nm)
+lambda_cosmic = 1e10   # Cosmic wavelength (10 billion meters)
+k_quantum = 2 * np.pi / lambda_quantum  # Quantum wave number (m⁻¹)
+k_cosmic = 2 * np.pi / lambda_cosmic    # Cosmic   Cosmic wave number (m⁻¹)
+E0 = 1e-21             # Reference energy level (J)
+omega = 1e12           # Angular frequency for time evolution (rad/s)
+
+# System parameters
+x = np.linspace(1e8, 1e12, 1000)  # Space (100 million to 1 trillion meters)
+r = 1e9                # Characteristic length (1 billion meters)
+theta = np.pi / 4      # Angle (45 degrees)
+v = 1e5                # Velocity (100 km/s, galactic scale)
+t = np.linspace(0, 1e-12, 100)  # Time array for animation (0 to 1 picosecond)
+
+def lovince_formula(x, t, r, theta, k_quantum, k_cosmic, v, E0, omega, ensemble=False):
+    """
+    Enhanced Lovince Formula: Combines quantum and cosmic effects with time evolution
+    
+    Parameters:
+        x: Space (meters)
+        t: Time (seconds)
+        r: Characteristic length (meters)
+        theta: Angle (radians)
+        k_quantum: Quantum wave number (m⁻¹)
+        k_cosmic: Cosmic wave number (m⁻¹)
+        v: Velocity (m/s)
+        E0: Base energy (J)
+        omega: Angular frequency (rad/s)
+        ensemble: If True, average over multiple theta for multiverse effect
+    """
+    # Quantum wave term (nanoscale effects)
+    quantum_wave = (np.exp(1j * (k_quantum * x - omega * t)) / (x**2 + r**2)) * (np.sin(theta) / x) * h_bar * v * r**2
+    
+    # Cosmic wave term (large-scale effects)
+    cosmic_wave = (np.exp(1j * (k_cosmic * x - omega * t)) / (x**2 + r**2)) * (np.cos(theta) / x) * h_bar * v * r**2
+    
+    # Geometric term (structural effects)
+    geometric_term = (np.pi * r**2 / 2) * (E0 / (1e-18))
+    
+    # Dynamic term (motion effects)
+    dynamic_term = (v * x * np.cos(theta) * h_bar) / r**2
+    
+    # Energy term (zero-point energy)
+    energy_term = E0
+    
+    # Ensemble averaging for multiverse-like effect
+    if ensemble:
+        theta_values = np.linspace(0, np.pi, 10)  # Multiple angles
+        quantum_sum = np.zeros_like(quantum_wave, dtype=complex)
+        cosmic_sum = np.zeros_like(cosmic_wave, dtype=complex)
+        for th in theta_values:
+            quantum_sum += (np.exp(1j * (k_quantum * x - omega * t)) / (x**2 + r**2)) * (np.sin(th) / x) * h_bar * v * r**2
+            cosmic_sum += (np.exp(1j * (k_cosmic * x - omega * t)) / (x**2 + r**2)) * (np.cos(th) / x) * h_bar * v * r**2
+        quantum_wave = quantum_sum / len(theta_values)
+        cosmic_wave = cosmic_sum / len(theta_values)
+    
+    return quantum_wave + cosmic_wave + geometric_term + dynamic_term + energy_term
+
+# Calculate for initial plot and animation
+L = lovince_formula(x, t[0], r, theta, k_quantum, k_cosmic, v, E0, omega, ensemble=True)
+
+# Set up plot
+fig, ax = plt.subplots(figsize=(12, 7))
+line_real, = ax.plot(x, np.real(L), label="Real Part (Re[L(x,t)])", color="navy", linewidth=2)
+line_imag, = ax.plot(x, np.imag(L), label="Imaginary Part (Im[L(x,t)])", color="crimson", linewidth=2, linestyle="--")
+ax.set_xlabel("Space x (meters)", fontsize=14)
+ax.set_ylabel("L(x,t) Value (joules)", fontsize=14)
+ax.set_title("Quantum-Cosmic Lovince Formula: Math as Zero, Science as Quantum", fontsize=16)
+ax.legend(fontsize=12)
+ax.grid(True, linestyle=":", alpha=0.7)
+ax.set_xlim(min(x), max(x))
+
+# Animation update function
+def update(t):
+    L = lovince_formula(x, t, r, theta, k_quantum, k_cosmic, v, E0, omega, ensemble=True)
+    line_real.set_ydata(np.real(L))
+    line_imag.set_ydata(np.imag(L))
+    return line_real, line_imag
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=t, interval=50, blit=True)
+
+# Show plot
+plt.tight_layout()
+plt.show()
+
+# Optional: Save animation (uncomment to save)
+# ani.save("quantum_cosmic_lovince.mp4", writer="ffmpeg", fps=20)
