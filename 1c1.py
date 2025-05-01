@@ -140,3 +140,92 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#!/usr/bin/env python3 """ LOVINCE AI v5.0 - Final Cosmic AI Edition Features:
+
+1. Multiple Activations (Swish, Mish, GELU, LovinceMix)
+
+
+2. PyTorch compatible model with trainable module
+
+
+3. Full visualization (activation shapes + training loss)
+
+
+4. Configurable hyperparameters: lambda, alpha, omega """
+
+
+
+import numpy as np import torch import torch.nn as nn import torch.optim as optim import matplotlib.pyplot as plt from typing import Callable from scipy.special import erf import argparse
+
+---------------------- Activation Functions ----------------------
+
+def swish(x: torch.Tensor, beta: float = 1.0) -> torch.Tensor: return x * torch.sigmoid(beta * x)
+
+def mish(x: torch.Tensor) -> torch.Tensor: return x * torch.tanh(torch.nn.functional.softplus(x))
+
+def gelu(x: torch.Tensor) -> torch.Tensor: return 0.5 * x * (1 + torch.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x ** 3)))
+
+def lovince_mix(x: torch.Tensor, alpha: float, omega: float) -> torch.Tensor: return alpha * swish(x, beta=omega) + (1 - alpha) * mish(x)
+
+---------------------- Lovince Activation Module ----------------------
+
+class LovinceActivation(nn.Module): def init(self, kind: str = 'lovince', alpha: float = 0.5, omega: float = 1.0): super().init() self.kind = kind.lower() self.alpha = alpha self.omega = omega
+
+def forward(self, x: torch.Tensor) -> torch.Tensor:
+    if self.kind == 'swish': return swish(x, beta=self.omega)
+    elif self.kind == 'mish': return mish(x)
+    elif self.kind == 'gelu': return gelu(x)
+    elif self.kind == 'lovince': return lovince_mix(x, self.alpha, self.omega)
+    else: raise ValueError(f"Unknown activation: {self.kind}")
+
+---------------------- Model ----------------------
+
+class CosmicNet(nn.Module): def init(self, input_dim: int, activation: str, alpha: float, omega: float): super().init() self.model = nn.Sequential( nn.Linear(input_dim, 64), LovinceActivation(activation, alpha, omega), nn.Linear(64, 32), LovinceActivation(activation, alpha, omega), nn.Linear(32, 1) )
+
+def forward(self, x):
+    return self.model(x)
+
+---------------------- Training Engine ----------------------
+
+def train_model(model, x_train, y_train, epochs: int = 100, lr: float = 0.001): criterion = nn.MSELoss() optimizer = optim.Adam(model.parameters(), lr=lr) loss_curve = []
+
+for epoch in range(epochs):
+    model.train()
+    outputs = model(x_train)
+    loss = criterion(outputs, y_train)
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    loss_curve.append(loss.item())
+return loss_curve
+
+---------------------- Visualization ----------------------
+
+def visualize_loss(loss_curve): plt.style.use('dark_background') plt.plot(loss_curve, color='lime', linewidth=2) plt.title("Cosmic Loss Curve") plt.xlabel("Epoch") plt.ylabel("Loss") plt.grid(alpha=0.3) plt.tight_layout() plt.show()
+
+def visualize_activations(): x = torch.linspace(-5, 5, 1000) plt.style.use('dark_background') plt.plot(x.numpy(), swish(x).numpy(), label='Swish') plt.plot(x.numpy(), mish(x).numpy(), label='Mish') plt.plot(x.numpy(), gelu(x).numpy(), label='GELU') plt.plot(x.numpy(), lovince_mix(x, 0.6, 1.2).numpy(), label='LovinceMix') plt.title("Activation Functions") plt.legend() plt.grid(alpha=0.3) plt.tight_layout() plt.show()
+
+---------------------- Main Execution ----------------------
+
+def main(): parser = argparse.ArgumentParser(description="Lovince AI v5.0") parser.add_argument('--activation', type=str, default='lovince', choices=['swish', 'mish', 'gelu', 'lovince'], help='Activation function to use') parser.add_argument('--alpha', type=float, default=0.6, help='LovinceMix alpha') parser.add_argument('--omega', type=float, default=1.2, help='LovinceMix omega') args = parser.parse_args()
+
+print("\n===== LOVINCE AI v5.0 - FINAL COSMIC AI EDITION =====")
+print(f"Activation: {args.activation}, Alpha: {args.alpha}, Omega: {args.omega}\n")
+
+# Synthetic training data
+x_train = torch.linspace(-2, 2, 200).reshape(-1, 1)
+y_train = torch.sin(np.pi * x_train) + 0.1 * torch.randn_like(x_train)
+
+model = CosmicNet(input_dim=1, activation=args.activation,
+                  alpha=args.alpha, omega=args.omega)
+
+loss_curve = train_model(model, x_train, y_train, epochs=300)
+visualize_activations()
+visualize_loss(loss_curve)
+
+if name == 'main': main()
+
