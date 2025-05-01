@@ -105,3 +105,6 @@ def celestial_demo():
 
 if __name__ == "__main__":
     celestial_demo()
+
+
+SuperState(n) = Spiral(n) × [Fib(n)×n² + Prime(n)^(Lucas(n)%5+1)] × ψₗ
