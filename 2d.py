@@ -177,3 +177,72 @@ if st.checkbox("🌊 Show Cosmic Flow Animation"):
     
     progress_bar.empty()
     status_text.success("Cosmic journey complete!")
+
+
+import streamlit as st
+import numpy as np
+import plotly.graph_objs as go
+from PIL import Image
+import time
+
+# Constants
+h = 6.626e-34  # Planck’s constant (quantum scale)
+G = 6.67430e-11  # Gravitational coupling
+nu_photon = 6e14  # Visible light frequency
+nu_biophoton = 1e13  # Consciousness-linked biophotons
+
+# Quantum Wavefunction ψ(t)
+def psi(t):
+    return np.sin(2 * np.pi * nu_photon * t) * np.exp(-0.01 * t)  # Damped oscillation
+
+# Biophoton Fluctuations (Consciousness Noise)
+def biophoton_field(t, r, intensity=1e6):
+    np.random.seed(int(t * 100))
+    noise = np.random.normal(0, 1, size=r.shape)
+    return intensity * np.sin(0.5 * t) * noise * np.exp(-r / 1e8)
+
+# Quantum-Cosmic Coupling S(t, r, θ, φ)
+def quantum_cosmic_field(t, r, theta, phi, epsilon=0.8):
+    E_photon = h * (nu_photon + nu_biophoton)
+    flux = E_photon / (r**2 + 1e7 * np.sin(1.2 * t))  # Oscillating potential
+    q_corr = epsilon * np.cos(theta) * np.sin(phi) + np.sqrt(epsilon) / (1 + np.cos(theta + phi))
+    return flux * psi(t) * q_corr + biophoton_field(t, r)
+
+# Streamlit Quantum Portal
+st.set_page_config(layout="wide", page_title="🔮 Quantum Side | Lovince", page_icon="🌀")
+
+# Sidebar Controls
+with st.sidebar:
+    st.title("⚛️ Quantum Controls")
+    t = st.slider("⏳ Time (s)", 0.0, 10.0, 5.0, 0.1)
+    r_min, r_max = st.slider("🌐 Spatial Range (m)", 1e6, 1e8, (1e7, 5e7))
+    theta = st.slider("θ (Radians)", 0.0, np.pi, np.pi/4, 0.01)
+    phi = st.slider("φ (Radians)", 0.0, np.pi, np.pi/3, 0.01)
+    epsilon = st.slider("ε (Consciousness Coupling)", 0.1, 1.0, 0.8, 0.01)
+    viz_mode = st.radio("🔍 Visualization", ["Wave", "Particle", "Matrix"])
+
+# Generate Quantum Data
+r_vals = np.linspace(r_min, r_max, 200)
+S_vals = quantum_cosmic_field(t, r_vals, theta, phi, epsilon)
+
+# Plot
+fig = go.Figure()
+if viz_mode == "Wave":
+    fig.add_trace(go.Scatter(x=r_vals, y=S_vals, mode='lines', line=dict(color='cyan')))
+elif viz_mode == "Particle":
+    fig.add_trace(go.Scatter(x=r_vals, y=S_vals, mode='markers', marker=dict(color='magenta', size=8)))
+else:  # Matrix
+    fig.add_trace(go.Heatmap(z=[S_vals], x=r_vals, colorscale='Viridis'))
+
+fig.update_layout(title=f"🌀 Quantum Field at t = {t:.1f}s", height=600)
+st.plotly_chart(fig, use_container_width=True)
+
+# Real-Time Animation
+if st.button("⚡ Activate Quantum Flux"):
+    progress_bar = st.progress(0)
+    for t_anim in np.linspace(0, 10, 50):
+        S_vals = quantum_cosmic_field(t_anim, r_vals, theta, phi, epsilon)
+        fig.data[0].y = S_vals
+        progress_bar.progress(int(t_anim * 10))
+        time.sleep(0.1)
+    st.success("Quantum field stabilized!")
