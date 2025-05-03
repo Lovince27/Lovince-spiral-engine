@@ -161,3 +161,8 @@ if __name__ == "__main__":
     print(f"- Quantum States: {len(qc.quantum.states)}")
     print(f"- Memory Patterns: {len(qc.memory.memory)}")
     print(f"- Last Brainwave Power: {results[-1]['brainwave_power']:.3f}")
+
+class AdvancedMemory(HolographicMemory):
+    def recall_enhanced(self):
+        """Adds temporal pattern reconstruction"""
+        return [x * abs(np.sin(self.quantum_phase)) for x in self.memory]
