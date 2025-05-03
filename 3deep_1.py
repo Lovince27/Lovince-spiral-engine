@@ -244,3 +244,8 @@ if __name__ == "__main__":
     print([round(x, 3) for x in result['cosmic_pattern']])
     
     print(f"\nSystem Entropy: {result['entropy']}/100")
+
+# Customize phase parameters
+engine.hack_reality([1,2,3], chaos_factor=1.5)  # More aggressive reality hacking
+engine.evolve_neural(generations=10)  # Deeper neural evolution
+engine.generate_cosmic(n=21)  # Longer cosmic sequences
