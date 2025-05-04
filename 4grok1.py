@@ -43,3 +43,19 @@ mse_reflection = np.mean((ground_truth - observed_reflection) ** 2)
 mse_shadow = np.mean((ground_truth - observed_shadow) ** 2)
 print("\nMSE (Reflection):", mse_reflection)
 print("MSE (Shadow):", mse_shadow)
+
+
+Binary Truth (True/False): [ True False  True  True False]
+Numerical Form: [1 0 1 1 0]
+
+Probabilistic Truth (Quantum-inspired): [0.15601864 0.25711025 0.22147086 0.21180353 0.15359671]
+Sum of Probabilities: 1.0
+
+Ground Truth: [1. 2. 3. 4.]
+Observed Reflection (Mirror): [1.1 1.9 3.2 3.8]
+Cosine Similarity (Reflection): 0.9985480779254053
+Observed Shadow (Parchhai): [0.5 1. 2. 5.]
+Cosine Similarity (Shadow): 0.9209925033932627
+
+MSE (Reflection): 0.035000000000000024
+MSE (Shadow): 1.625
