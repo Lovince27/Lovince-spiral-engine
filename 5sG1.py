@@ -46,3 +46,59 @@ i^2 ~0~ i^4 = (-1+1.2e-16j) ~0~ (1-2.4e-16j)
 i^3 ~0~ i^5 = (-1.8e-16-1j) ~0~ (3.7e-16+1j)
 
 Next pair: i^5 ~0~ i^7 = (3.7e-16+1j) ~0~ (-6.1e-16-1j)
+
+
+# 1.py
+import cmath
+import matplotlib.pyplot as plt
+
+# Euler's formula parameters
+theta = cmath.pi / 2  # 90 degrees in radians
+
+def i_power(n):
+    """Return i^n using Euler's formula, rounded to avoid floating-point errors."""
+    val = cmath.exp(1j * n * theta)
+    return complex(round(val.real, 10), round(val.imag, 10))
+
+def equivalent_powers(a, b):
+    """Return True if i^a and i^b are equivalent (modulo 4)."""
+    return (a - b) % 4 == 0
+
+# 1. Print the sequence of i^n for n = 0 to 7
+print("Sequence of powers of i (using Euler's formula):")
+for n in range(8):
+    val = i_power(n)
+    print(f"i^{n} = {val}")
+
+# 2. Check and print equivalence of some user pairs
+print("\nEquivalence checks (modulo 4):")
+pairs = [(3, 1), (2, 4), (3, 5), (5, 7)]
+for a, b in pairs:
+    val_a = i_power(a)
+    val_b = i_power(b)
+    eq = equivalent_powers(a, b)
+    print(f"i^{a} = {val_a}, i^{b} = {val_b} -> Equivalent: {eq}")
+
+# 3. Print summary table for i^n mod 4
+print("\nSummary Table (i^n, n = 0 to 3):")
+table = {0: 1, 1: 1j, 2: -1, 3: -1j}
+for n in range(4):
+    print(f"i^{n} = {table[n]}")
+
+# 4. Plot the powers of i on the complex plane
+points = [i_power(n) for n in range(8)]
+x = [p.real for p in points]
+y = [p.imag for p in points]
+
+plt.figure(figsize=(5,5))
+plt.scatter(x, y, color='blue')
+for n, (xr, yr) in enumerate(zip(x, y)):
+    plt.text(xr, yr, f'i^{n}', fontsize=12, ha='right', va='bottom')
+plt.axhline(0, color='gray', linewidth=0.5)
+plt.axvline(0, color='gray', linewidth=0.5)
+plt.title('Powers of i on the Complex Plane')
+plt.xlabel('Real')
+plt.ylabel('Imaginary')
+plt.grid(True)
+plt.axis('equal')
+plt.show()
