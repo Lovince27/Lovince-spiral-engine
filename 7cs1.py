@@ -60,3 +60,56 @@ plt.title('Visualization of Lovince Formula with Einstein Tensor Term')
 plt.xlabel('x (Position)')
 plt.ylabel('t (Time)')
 plt.show()
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+G = 6.67430e-11  # Gravitational constant (m^3 kg^-1 s^-2)
+c = 3e8          # Speed of light (m/s)
+rho = 1000       # Mass-energy density (kg/m^3)
+pi = np.pi
+
+# Einstein Tensor term calculation
+def tensor_term(t):
+    constant = 2.07e-40  # Precomputed constant for tensor term
+    return constant * t**2
+
+# Lovince formula (simplified)
+def lovince_formula(x, t, r, theta, dx_dt, a, b):
+    term1 = (np.exp(1j * x) * np.sin(theta)) / (x * (x**2 + r**2))
+    term2 = (pi * r**2) / 2
+    term3 = dx_dt * x * np.cos(theta)
+    term4 = (a**2 + b**2) / 2
+    term5 = tensor_term(t)
+    return term1 + term2 + term3 + term4 + term5
+
+# Parameters
+x_values = np.linspace(1, 100, 200)
+t_values = np.linspace(0, 10, 200)
+r = 50
+theta = np.pi / 4
+dx_dt = 10
+a = 1
+b = 1
+
+# Compute Lovince formula for each x and t combination
+X, T = np.meshgrid(x_values, t_values)
+Z = np.zeros_like(X, dtype=complex)
+
+for i in range(len(t_values)):
+    for j in range(len(x_values)):
+        Z[i, j] = lovince_formula(X[i, j], T[i], r, theta, dx_dt, a, b)
+
+# Compute the magnitude of Z
+Z_magnitude = np.abs(Z)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.contourf(X, T, Z_magnitude, 20, cmap='plasma')
+plt.colorbar(label='Magnitude of L(x, t, r, θ)')
+plt.title('Magnitude of Lovince Formula with Einstein Tensor Term')
+plt.xlabel('x (Position)')
+plt.ylabel('t (Time)')
+plt.show()
