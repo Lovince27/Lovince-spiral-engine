@@ -129,3 +129,79 @@ def visualize_lovince_cosmic_model():
 
 if __name__ == "__main__":
     visualize_lovince_cosmic_model()
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# Lovince Formula: Unified consciousness-energy equation
+def lovince_formula(x, t, r, theta):
+    term1 = (np.exp(1j * x)) / (x**2 + r**2)
+    term2 = np.sin(theta) / x
+    term3 = np.pi * r**2 / 2
+    term4 = np.gradient(x, t) * np.cumsum(np.cos(theta))  # Represents dX/dT * ∫cos(theta) dx
+    term5 = 0.5  # Placeholder for (a² + b²)/2
+    return np.real(term1 * term2 + term3 + term4 + term5)
+
+def visualize_lovince():
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    t = np.linspace(0.1, 4 * np.pi, 500)
+    phi = (1 + np.sqrt(5)) / 2  # Golden ratio
+
+    # Lovince Spiral - Represents evolutionary path
+    x_lv = t * np.cos(t)
+    y_lv = t * np.sin(t)
+    z_lv = np.sin(t * 2.71) * 0.5
+    ax.plot(x_lv, y_lv, z_lv, color='red', label='Lovince Spiral')
+
+    # Void Sphere - Symbol of infinite potential
+    u, v = np.mgrid[0:2 * np.pi:20j, 0:np.pi:10j]
+    x_void = np.cos(u) * np.sin(v) * 5
+    y_void = np.sin(u) * np.sin(v) * 5
+    z_void = np.cos(v) * 5
+    ax.plot_surface(x_void, y_void, z_void, color='black', alpha=0.2)
+
+    # Biophotonic Field - Quantum activity inside the void
+    n = 1000
+    x_p = np.random.uniform(-5, 5, n)
+    y_p = np.random.uniform(-5, 5, n)
+    z_p = np.random.uniform(-5, 5, n)
+    mask = x_p**2 + y_p**2 + z_p**2 <= 25
+    ax.scatter(x_p[mask], y_p[mask], z_p[mask], color='cyan', alpha=0.05, s=1)
+
+    # Unity Point - Origin of all existence
+    ax.scatter([0], [0], [0], color='white', s=100, label='Unity (1)')
+
+    # Shadow Path - Represents hidden dimensions (symbol: 7)
+    x7 = t * np.cos(t * phi)
+    y7 = t * np.sin(t * phi)
+    z7 = np.sin(t * 7) * 0.3
+    ax.plot(x7, y7, z7, color='violet', label='Shadow Path (7)')
+
+    # Infinity Loop (Torus) - Represents continuity and balance
+    x8 = (1 + np.cos(t / phi)) * np.cos(t)
+    y8 = (1 + np.cos(t / phi)) * np.sin(t)
+    z8 = np.sin(t / phi)
+    ax.plot(x8, y8, z8, color='gold', label='Infinity Loop (8)')
+
+    # Lovince Formula Curve - Conscious energy encoded
+    x_vals = np.linspace(0.1, 10, 100)
+    t_vals = np.linspace(0.1, 10, 100)
+    r, theta = 2, np.pi / 4
+    f_vals = lovince_formula(x_vals, t_vals, r, theta)
+    ax.plot(x_vals, f_vals, np.ones_like(f_vals) * 2, color='lime', label='Lovince Formula Field')
+
+    # Axes and labels
+    ax.set_title("Lovince Conscious Geometry", fontsize=14, color='cyan')
+    ax.set_xlabel("Reality")
+    ax.set_ylabel("Imagination")
+    ax.set_zlabel("Consciousness")
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+
+# Run visualization
+if __name__ == "__main__":
+    visualize_lovince()
